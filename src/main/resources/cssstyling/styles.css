@@ -1,0 +1,5 @@
+.welcome-label {
+    -fx-text-fill: white;
+    -fx-font-size: 90px;
+    -fx-font-weight: bold;
+}

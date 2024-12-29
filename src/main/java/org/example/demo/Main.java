@@ -16,7 +16,6 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
-import javafx.scene.text.Font;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
@@ -58,75 +57,27 @@ public class Main extends Application {
         universe.getChildren().addAll(world);
         universe.getChildren().add(root);
 
-        Label label1 = createLabel("Global",Color.WHITE,60,-700,-370,-200);
-        Label label2 = createLabel("Weather",Color.WHITE,60,-620,-300,-200);
-        Label label3 = createLabel("App",Color.WHITE,60,-660,-230,-200);
+
+        //---------------Labels-----------------
+        Label label1 = UiComponents.createLabel("Global",Color.WHITE,60,-700,-370,-200);
+        Label label2 = UiComponents.createLabel("Weather",Color.WHITE,60,-620,-300,-200);
+        Label label3 = UiComponents.createLabel("App",Color.WHITE,60,-660,-230,-200);
 
 
 
 
-        //-------------------Buttons--------------------------
-        Button buttonRegister = new Button("Create Account");
-        buttonRegister.setTranslateX(-560);
-        buttonRegister.setTranslateY(5);
-        buttonRegister.setTranslateZ(-200);
-        buttonRegister.setPrefSize(200,25);
-        buttonRegister.setWrapText(true);
-        buttonRegister.setStyle("-fx-font-size: 10px;-fx-background-color: transparent;-fx-text-fill: white;");
+        //---------------Buttons-----------------
+        Button buttonRegister = UiComponents.createButton("Create Account",-560,5,-200,200,25);
+        Button buttonLogin = UiComponents.createButton("Log in",-560,5,-200,200,25);
 
 
-        Button buttonLogin = new Button("Log in");
-        buttonLogin.setTranslateX(-560);
-        buttonLogin.setTranslateY(5);
-        buttonLogin.setTranslateZ(-200);
-        buttonLogin.setPrefSize(200,25);
-        buttonLogin.setWrapText(true);
-        buttonLogin.setStyle("-fx-font-size: 10px;-fx-background-color: transparent;-fx-text-fill: white;");
 
-
-        //-------------------Register--------------------------
-        TextField textRegisterPassRep = new TextField();
-        textRegisterPassRep.setPromptText("Enter your password");
-        textRegisterPassRep.setTranslateX(-620);
-        textRegisterPassRep.setTranslateY(-60);
-        textRegisterPassRep.setTranslateZ(-200);
-        textRegisterPassRep.setPrefHeight(25);
-        textRegisterPassRep.setPrefWidth(200);
-
-        TextField textRegisterEmail = new TextField();
-        textRegisterEmail.setPromptText("Enter your email");
-        textRegisterEmail.setTranslateX(-620);
-        textRegisterEmail.setTranslateY(-100);
-        textRegisterEmail.setTranslateZ(-200);
-        textRegisterEmail.setPrefHeight(25);
-        textRegisterEmail.setPrefWidth(200);
-
-        TextField textRegisterPass = new TextField();
-        textRegisterPass.setPromptText("Enter your password again");
-        textRegisterPass.setTranslateX(-620);
-        textRegisterPass.setTranslateY(-20);
-        textRegisterPass.setTranslateZ(-200);
-        textRegisterPass.setPrefHeight(25);
-        textRegisterPass.setPrefWidth(200);
-
-        //-------------------Login--------------------------
-        TextField textLoginPass = new TextField();
-        textLoginPass.setPromptText("Enter your password");
-        textLoginPass.setTranslateX(-620);
-        textLoginPass.setTranslateY(-20);
-        textLoginPass.setTranslateZ(-200);
-        textLoginPass.setPrefHeight(25);
-        textLoginPass.setPrefWidth(200);
-        textLoginPass.setFocusTraversable(false);
-
-        TextField textLoginEmail = new TextField();
-        textLoginEmail.setPromptText("Enter your email");
-        textLoginEmail.setTranslateX(-620);
-        textLoginEmail.setTranslateY(-70);
-        textLoginEmail.setTranslateZ(-200);
-        textLoginEmail.setPrefHeight(25);
-        textLoginEmail.setPrefWidth(200);
-        textLoginEmail.setFocusTraversable(false);
+        //---------------TextFields-----------------
+        TextField textRegisterPassRep = UiComponents.createTextField("Enter your password", -620, -60, -200, 25, 200);
+        TextField textRegisterEmail= UiComponents.createTextField("Enter your password", -620, -100, -200, 25, 200);
+        TextField textRegisterPass = UiComponents.createTextField("Enter your password again", -620, -20, -200, 25, 200);
+        TextField textLoginPass = UiComponents.createTextField("Enter your password", -620, -20, -200, 25, 200);
+        TextField textLoginEmail = UiComponents.createTextField("Enter your email", -620, -70, -200, 25, 200);
 
 
 
@@ -163,8 +114,6 @@ public class Main extends Application {
         primaryStage.setTitle("Main Window");
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        primaryStage.requestFocus();
         prepareAnimation();
     }
 
@@ -176,17 +125,6 @@ public class Main extends Application {
             }
         };
         timer.start();
-    }
-
-    private Label createLabel(String text,Color color,int size,int X,int Y,int Z){
-        Label label = new Label(text);
-        label.setTextFill(color);
-        label.setFont(Font.font("Arial", size));
-        label.setStyle("-fx-font-weight: bold;");
-        label.setTranslateX(X);
-        label.setTranslateY(Y);
-        label.setTranslateZ(Z);
-        return label;
     }
 
     private Node prepareEarth() {

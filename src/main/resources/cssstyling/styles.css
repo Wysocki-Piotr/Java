@@ -2,4 +2,8 @@
     -fx-text-fill: white;
     -fx-font-size: 90px;
     -fx-font-weight: bold;
+    -fx-padding: 0;
+    -fx-alignment: top-left;
+    -fx-translate-y: -100;
+    -fx-translate-x: -100;
 }

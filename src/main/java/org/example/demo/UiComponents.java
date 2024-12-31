@@ -21,14 +21,14 @@ public class UiComponents {
 
     }
 
-    public static Button createButton(String text,int X,int Y,int Z,int sizeX,int sizeY){
+    public static Button createButton(String text,int X,int Y,int Z,int sizeX,int sizeY,int fontSize){
         Button button = new Button(text);
         button.setTranslateX(X);
         button.setTranslateY(Y);
         button.setTranslateZ(Z);
         button.setPrefSize(sizeX,sizeY);
         button.setWrapText(true);
-        button.setStyle("-fx-font-size: 10px;-fx-background-color: transparent;-fx-text-fill: white;");
+        button.setStyle("-fx-font-size: "+fontSize+" px;-fx-background-color: transparent;-fx-text-fill: white;");
         return button;
     }
 

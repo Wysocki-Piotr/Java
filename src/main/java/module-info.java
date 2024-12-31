@@ -11,7 +11,10 @@ module org.example.demo {
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
     requires java.desktop;
+    requires com.google.gson;
 
-    opens org.example.demo to javafx.fxml;
+    opens org.example.demo to javafx.fxml, com.google.gson;
     exports org.example.demo;
+    exports DB;
+    opens DB to com.google.gson, javafx.fxml;
 }

@@ -127,7 +127,7 @@ public class Main extends Application {
                         System.out.println("success");
                         LOGGED = true;
                         Set<Control> controls = new HashSet<>();
-                        controls.addAll(List.of(label1,label2,label3,textLoginEmail,textLoginPass,textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonRegister,buttonEnter));
+                        controls.addAll(List.of(label1,label2,label3,textLoginEmail,textLoginPass,textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonRegister,buttonEnter,buttonLogin));
                         controls.forEach(control -> {
                             TranslateTransition translateTransition = new TranslateTransition(Duration.millis(2000), control);
                             translateTransition.setByX(-1000);
@@ -139,7 +139,9 @@ public class Main extends Application {
                             });
 
                         });
-                        initMouseControl(world, scene, primaryStage);
+                        //initMouseControl(world, scene, primaryStage);
+                        animateCamera(camera,  1200, 400);
+
                     } else {
                         System.out.println("Invalid");
 
@@ -185,7 +187,7 @@ public class Main extends Application {
                     System.out.println("registration successful");
                     LOGGED = true;
                     Set<Control> controls = new HashSet<>();
-                    controls.addAll(List.of(label1,label2,label3,textLoginEmail,textLoginPass,textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonRegister,buttonEnter));
+                    controls.addAll(List.of(label1,label2,label3,textLoginEmail,textLoginPass,textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonRegister,buttonEnter,buttonLogin));
                     controls.forEach(control -> {
                         TranslateTransition translateTransition = new TranslateTransition(Duration.millis(2000), control);
                         translateTransition.setByX(-1000);
@@ -197,7 +199,8 @@ public class Main extends Application {
                         });
 
                     });
-                    initMouseControl(world, scene, primaryStage);
+                    animateCamera(camera,  1200, 400);
+                    //initMouseControl(world, scene, primaryStage);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -205,10 +208,6 @@ public class Main extends Application {
                 textRegisterPass.clear();
                 textRegisterPassRep.clear();
             }
-
-
-
-
         });
 
 
@@ -216,17 +215,17 @@ public class Main extends Application {
 
 
 
-        scene.setOnKeyPressed(event -> {
-            switch (event.getCode()) {
-                case T:
-                    camera.translateZProperty().set(-1600);
-                    camera.translateXProperty().set(-220);
-                    camera.translateYProperty().set(-20);
-                    break;
-                default:
-                    break;
-            }
-        });
+//        scene.setOnKeyPressed(event -> {
+//            switch (event.getCode()) {
+//                case T:
+//                    camera.translateZProperty().set(-1600);
+//                    camera.translateXProperty().set(-220);
+//                    camera.translateYProperty().set(-20);
+//                    break;
+//                default:
+//                    break;
+//            }
+//        });
 
         primaryStage.setTitle("Main Window");
         primaryStage.setScene(scene);
@@ -235,6 +234,9 @@ public class Main extends Application {
     }
 
     private void prepareAnimation() {
+        if (LOGGED) {
+            return;
+        }
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
@@ -242,6 +244,27 @@ public class Main extends Application {
             }
         };
         timer.start();
+    }
+
+    private void animateCamera(Camera camera, int duration, int frames) {
+
+
+        double startX = camera.getTranslateX();
+        double startZ = camera.getTranslateZ();
+        double controlZ = startZ - 2000;
+        Timeline timeline = new Timeline();
+        for (int i = 0; i <= frames; i++) {
+            double t = (double) i / frames;
+            double x = (1 - t) * startX + t * 250;
+            double z = (1 - t) * (1 - t) * startZ + 2 * (1 - t) * t * controlZ + t * t * (-1600);
+            KeyFrame keyFrame = new KeyFrame(Duration.millis(t * duration), event -> {
+                camera.setTranslateX(x);
+                camera.setTranslateZ(z);
+            });
+            timeline.getKeyFrames().add(keyFrame);
+        }
+
+        timeline.play();
     }
 
     private Node prepareEarth() {
@@ -253,6 +276,7 @@ public class Main extends Application {
 
         sphere.setRotationAxis(Rotate.Y_AXIS);
         sphere.setMaterial(earthMaterial);
+        sphere.setTranslateZ(200);
 
         return sphere;
     }

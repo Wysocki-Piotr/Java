@@ -46,7 +46,6 @@ public class JsonDatabase {
         FileWriter writer = new FileWriter(FILE_PATH);
         gson.toJson(dbWrapper, writer);
         writer.close();
-        System.out.println("Database updated");
     }
 
     private static class DatabaseWrapper {

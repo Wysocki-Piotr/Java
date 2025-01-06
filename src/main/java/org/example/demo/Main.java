@@ -4,51 +4,44 @@ import DB.JsonDatabase;
 import DB.UserScheme;
 import javafx.animation.*;
 import javafx.application.Application;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+
+import com.sothawo.mapjfx.Configuration;
+import com.sothawo.mapjfx.Coordinate;
+import com.sothawo.mapjfx.MapType;
+import com.sothawo.mapjfx.MapView;
+
 public class Main extends Application {
 
     private static final float WIDTH = 1400;
     private static final float HEIGHT = 1000;
-
-    private double anchorX, anchorY;
-    private double anchorAngleX = 0;
-    private double anchorAngleY = 0;
-    private final DoubleProperty angleX = new SimpleDoubleProperty(0);
-    private final DoubleProperty angleY = new SimpleDoubleProperty(0);
+    private AnimationTimer timer;
 
     private final Sphere sphere = new Sphere(150);
-
-    private boolean LOGGED = false;
+    private Scene scene;
 
 
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo/hello-view.fxml"));
-        Parent root = loader.load();
 
         Camera camera = new PerspectiveCamera(true);
         camera.setNearClip(1);
@@ -57,11 +50,17 @@ public class Main extends Application {
         camera.translateXProperty().set(-220);
         camera.translateYProperty().set(-20);
 
+
+
+
         Group world = new Group();
         Group universe = new Group();
         world.getChildren().addAll(prepareEarth());
         universe.getChildren().addAll(world);
-        universe.getChildren().add(root);
+
+
+
+
 
 
         //---------------Labels-----------------
@@ -81,8 +80,6 @@ public class Main extends Application {
         TextField textLoginPass = UiComponents.createTextField("Enter your password", -620, -20, -200, 25, 200);
         TextField textLoginEmail = UiComponents.createTextField("Enter your email", -620, -70, -200, 25, 200);
 
-
-
         buttonLogin.onActionProperty().set((ActionEvent event) -> {
             universe.getChildren().removeAll(textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonLogin);
             universe.getChildren().addAll(textLoginEmail,textLoginPass,buttonRegister);
@@ -98,7 +95,7 @@ public class Main extends Application {
         });
 
         universe.getChildren().addAll(label1,label2,label3,textLoginEmail,textLoginPass,buttonRegister,buttonEnter);
-        Scene scene = new Scene(universe, WIDTH, HEIGHT, true);
+        scene = new Scene(universe, WIDTH, HEIGHT, true);
         scene.setFill(Color.BLACK);
         scene.setCamera(camera);
 
@@ -109,8 +106,8 @@ public class Main extends Application {
                 String email = textLoginEmail.getText();
                 String password = textLoginPass.getText();
 
-                if (InputValidator.isEmpty(email) || InputValidator.isEmpty(password)) {
-                    System.out.println("fill all fields");
+                if (email.isEmpty() || password.isEmpty()) {
+                    System.out.println("Fill all fields");
                     textLoginEmail.clear();
                     textLoginPass.clear();
                     return;
@@ -125,26 +122,19 @@ public class Main extends Application {
 
                     if (loginSuccessful) {
                         System.out.println("success");
-                        LOGGED = true;
                         Set<Control> controls = new HashSet<>();
                         controls.addAll(List.of(label1,label2,label3,textLoginEmail,textLoginPass,textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonRegister,buttonEnter,buttonLogin));
                         controls.forEach(control -> {
                             TranslateTransition translateTransition = new TranslateTransition(Duration.millis(2000), control);
                             translateTransition.setByX(-1000);
-
                             translateTransition.play();
-
                             translateTransition.setOnFinished(finish ->{
                                 universe.getChildren().removeAll(controls);
                             });
-
                         });
-                        //initMouseControl(world, scene, primaryStage);
-                        animateCamera(camera,  1200, 400);
-
+                        animateCamera(camera,  1200, 400,primaryStage);
                     } else {
                         System.out.println("Invalid");
-
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -158,8 +148,8 @@ public class Main extends Application {
                 String password = textRegisterPass.getText();
                 String passwordRep = textRegisterPassRep.getText();
 
-                if (InputValidator.isEmpty(email) || InputValidator.isEmpty(password) || InputValidator.isEmpty(passwordRep)) {
-                    System.out.println("fill all fields");
+                if (email.isEmpty() || password.isEmpty() || passwordRep.isEmpty()) {
+                    System.out.println("Fill all fields");
                     textRegisterEmail.clear();
                     textRegisterPass.clear();
                     textRegisterPassRep.clear();
@@ -185,7 +175,6 @@ public class Main extends Application {
 
                     db.writeUsers(users);
                     System.out.println("registration successful");
-                    LOGGED = true;
                     Set<Control> controls = new HashSet<>();
                     controls.addAll(List.of(label1,label2,label3,textLoginEmail,textLoginPass,textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonRegister,buttonEnter,buttonLogin));
                     controls.forEach(control -> {
@@ -199,8 +188,8 @@ public class Main extends Application {
                         });
 
                     });
-                    animateCamera(camera,  1200, 400);
-                    //initMouseControl(world, scene, primaryStage);
+                    animateCamera(camera,  1200, 400,primaryStage);
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -210,34 +199,15 @@ public class Main extends Application {
             }
         });
 
-
-
-
-
-
-//        scene.setOnKeyPressed(event -> {
-//            switch (event.getCode()) {
-//                case T:
-//                    camera.translateZProperty().set(-1600);
-//                    camera.translateXProperty().set(-220);
-//                    camera.translateYProperty().set(-20);
-//                    break;
-//                default:
-//                    break;
-//            }
-//        });
-
         primaryStage.setTitle("Main Window");
+        primaryStage.setResizable(false);
         primaryStage.setScene(scene);
         primaryStage.show();
         prepareAnimation();
     }
 
     private void prepareAnimation() {
-        if (LOGGED) {
-            return;
-        }
-        AnimationTimer timer = new AnimationTimer() {
+        timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 sphere.rotateProperty().set(sphere.getRotate() + 0.2);
@@ -246,7 +216,7 @@ public class Main extends Application {
         timer.start();
     }
 
-    private void animateCamera(Camera camera, int duration, int frames) {
+    private void animateCamera(Camera camera, int duration, int frames, Stage primaryStage) {
 
 
         double startX = camera.getTranslateX();
@@ -255,8 +225,8 @@ public class Main extends Application {
         Timeline timeline = new Timeline();
         for (int i = 0; i <= frames; i++) {
             double t = (double) i / frames;
-            double x = (1 - t) * startX + t * 250;
-            double z = (1 - t) * (1 - t) * startZ + 2 * (1 - t) * t * controlZ + t * t * (-1600);
+            double x = (1 - t) * startX + t * 0.5;
+            double z = (1 - t) * (1 - t) * startZ + 2 * (1 - t) * t * controlZ + t * t * (200);
             KeyFrame keyFrame = new KeyFrame(Duration.millis(t * duration), event -> {
                 camera.setTranslateX(x);
                 camera.setTranslateZ(z);
@@ -264,7 +234,31 @@ public class Main extends Application {
             timeline.getKeyFrames().add(keyFrame);
         }
 
+        timeline.setOnFinished(event -> {
+
+            MapView mapView = new MapView();
+            mapView.setMapType(MapType.OSM);
+            mapView.setCenter(new Coordinate(37.39822, -121.9643936));
+            mapView.setZoom(14);
+            mapView.initialize(Configuration.builder()
+                    .showZoomControls(true)
+                    .build());
+
+            BorderPane root = new BorderPane();
+            root.setCenter(mapView);
+            double RemX = primaryStage.getX();
+            double RemY = primaryStage.getY();
+            primaryStage.getY();
+            Scene mapViewScene = new Scene(root, WIDTH, HEIGHT);
+            primaryStage.setScene(mapViewScene);
+            primaryStage.setX(RemX);
+            primaryStage.setY(RemY);
+            primaryStage.show();
+        });
+
+
         timeline.play();
+
     }
 
     private Node prepareEarth() {
@@ -279,53 +273,6 @@ public class Main extends Application {
         sphere.setTranslateZ(200);
 
         return sphere;
-    }
-
-
-
-
-    private void initMouseControl(Group group, Scene scene, Stage stage) {
-        if(!LOGGED){
-            return;
-        }else{
-            Rotate xRotate;
-            Rotate yRotate;
-            group.getTransforms().addAll(
-                    xRotate = new Rotate(0, Rotate.X_AXIS),
-                    yRotate = new Rotate(0, Rotate.Y_AXIS)
-            );
-            xRotate.angleProperty().bind(angleX);
-            yRotate.angleProperty().bind(angleY);
-
-            scene.setOnMousePressed(event -> {
-                anchorX = event.getSceneX();
-                anchorY = event.getSceneY();
-                anchorAngleX = angleX.get();
-                anchorAngleY = angleY.get();
-            });
-
-            scene.setOnMouseDragged(event -> {
-                angleX.set(anchorAngleX - (anchorY - event.getSceneY()));
-                angleY.set(anchorAngleY + anchorX - event.getSceneX());
-            });
-
-            stage.addEventHandler(ScrollEvent.SCROLL, event -> {
-                double delta = event.getDeltaY();
-                double scaleFactor = delta > 0 ? 1.1 : 0.9;
-
-                Camera camera = scene.getCamera();
-                double cursorX = event.getSceneX();
-                double cursorY = event.getSceneY();
-
-                double directionX = (cursorX - scene.getWidth() / 2) * (scaleFactor - 1);
-                double directionY = (cursorY - scene.getHeight() / 2) * (scaleFactor - 1);
-
-                camera.setTranslateX(camera.getTranslateX() + directionX);
-                camera.setTranslateY(camera.getTranslateY() + directionY);
-                camera.setTranslateZ(camera.getTranslateZ() + delta);
-            });
-        }
-
     }
 
 }

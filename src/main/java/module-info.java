@@ -2,7 +2,6 @@ module org.example.demo {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
-    requires java.mail;
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
     requires net.synedra.validatorfx;
@@ -12,6 +11,7 @@ module org.example.demo {
     requires com.almasb.fxgl.all;
     requires java.desktop;
     requires com.google.gson;
+    requires com.sothawo.mapjfx;
 
     opens org.example.demo to javafx.fxml, com.google.gson;
     exports org.example.demo;

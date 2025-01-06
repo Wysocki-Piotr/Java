@@ -7,3 +7,9 @@
     -fx-translate-y: -100;
     -fx-translate-x: -100;
 }
+.tile {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #000000;
+    -fx-border-width: 2px;
+    -fx-padding: 10px;
+}

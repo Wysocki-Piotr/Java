@@ -182,6 +182,9 @@ public class Main extends Application {
                                 throw new RuntimeException(ex);
                             }
                         });
+                        sphere.setOnMouseClicked(click ->{
+                            animateCamera(camera, 1200, 400, primaryStage);
+                        });
                     } else {
                         System.out.println("Invalid");
                     }
@@ -235,7 +238,7 @@ public class Main extends Application {
                             universe.getChildren().removeAll(controls);
                         });
                     });
-                // po rejestracji powinny wyswietlac sie przyciski z logowaniem
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -283,7 +286,7 @@ public class Main extends Application {
 
             MapView mapView = new MapView();
             mapView.setMapType(MapType.OSM);
-            mapView.setCenter(new Coordinate(37.39822, -121.9643936));
+            mapView.setCenter(new Coordinate(52.2312,20.9897));
             mapView.setZoom(14);
             mapView.initialize(Configuration.builder()
                     .showZoomControls(true)
@@ -324,17 +327,7 @@ public class Main extends Application {
         camera.translateXProperty().set(-220);
         camera.translateYProperty().set(-20);
 
-        sphere.setOnMouseClicked(event -> {
-            if (Logged){
-            Set<Control> controls = new HashSet<>();
-            controls.addAll(List.of(label1,label2,label3,textLoginEmail,textLoginPass,textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonRegister,buttonEnter,buttonLogin));
-            controls.forEach(control -> {
-                TranslateTransition translateTransition = new TranslateTransition(Duration.millis(2000), control);
-                translateTransition.setByX(-1000);
-                translateTransition.play();
-            });
-            animateCamera(camera, 1200, 400, primaryStage);
-        }});
+
         return sphere;
     }
 
@@ -355,7 +348,6 @@ public class Main extends Application {
                     " -fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #1E88E5");
             tile.setOnAction(event -> {
                 System.out.println("Selected place: " + place);
-                // Dodac wywołanie szczegółów miejsca
             });
             gridPane.add(tile, i,0);
         }

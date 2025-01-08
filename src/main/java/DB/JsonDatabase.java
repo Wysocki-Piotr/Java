@@ -9,7 +9,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JsonDatabase {
     private static final String FILE_PATH = "src/main/java/DB/database.json";
@@ -46,6 +50,19 @@ public class JsonDatabase {
         FileWriter writer = new FileWriter(FILE_PATH);
         gson.toJson(dbWrapper, writer);
         writer.close();
+    }
+    public void deleteUser(String email) throws IOException{
+        JsonDatabase db = new JsonDatabase();
+        List<UserScheme> users = db.readUsers();
+        Iterator<UserScheme> iterator = users.iterator();
+        while (iterator.hasNext()) {
+            UserScheme user = iterator.next();
+            if (user.getEmail().equalsIgnoreCase(email)) {
+                iterator.remove();
+                break;
+            }
+        }
+        writeUsers(users);
     }
 
     private static class DatabaseWrapper {

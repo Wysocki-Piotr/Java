@@ -39,31 +39,35 @@ public class Main extends Application {
     private final Sphere sphere = new Sphere(150);
     private Scene scene;
     private boolean Logged = false;
+    private boolean first = true;
 
     //---------------Labels-----------------
-    private Label label1 = UiComponents.createLabel("Global",Color.WHITE,60,-700,-370,-200);
-    private Label label2 = UiComponents.createLabel("Weather",Color.WHITE,60,-620,-300,-200);
-    private Label label3 = UiComponents.createLabel("App",Color.WHITE,60,-660,-230,-200);
-    private Label label4 = UiComponents.createLabel("Dodawanie ulubionych miejsc",Color.WHITE,30,-720,-100,-200);
-
+    private Label label1 = UiComponents.createLabel("Global", Color.WHITE, 60, -700, -370, -200);
+    private Label label2 = UiComponents.createLabel("Weather", Color.WHITE, 60, -620, -300, -200);
+    private Label label3 = UiComponents.createLabel("App", Color.WHITE, 60, -660, -230, -200);
+    private Label label4 = UiComponents.createLabel("Dodawanie ulubionych miejsc", Color.WHITE, 30, -720, -100, -200);
+    private Label label5 = UiComponents.createLabel("ALERTY", Color.WHITE, 30, -720, 50, -200);
     //---------------Buttons-----------------
-    private Button buttonRegister = UiComponents.createButton("Create Account",-560,5,-200,200,25,10);
-    private Button buttonLogin = UiComponents.createButton("Log in",-560,5,-200,200,25,10);
-    private Button buttonEnter = UiComponents.createButton("Enter",-600,30,-200,200,25,20);
-    private Button buttonEnter2 = UiComponents.createButton("Enter",-620,-30,-200,200,25,20);
-    private Button show = UiComponents.createButton("Pokaż ulubione",-720,0,-200,200,25,20);
-    private Button delete1 = UiComponents.createButton("Usuń",-780,-320,-200,200,25,20);
-    private Button delete2 = UiComponents.createButton("Usuń",-630,-320,-200,200,25,20);
-    private Button delete3 = UiComponents.createButton("Usuń",-480,-320,-200,200,25,20);
+    private Button buttonRegister = UiComponents.createButton("Create Account", -560, 5, -200, 200, 25, 10);
+    private Button buttonLogin = UiComponents.createButton("Log in", -560, 5, -200, 200, 25, 10);
+    private Button buttonEnter = UiComponents.createButton("Enter", -600, 30, -200, 200, 25, 20);
+    private Button buttonEnter2 = UiComponents.createButton("Enter", -620, -30, -200, 200, 25, 20);
+    private Button show = UiComponents.createButton("Pokaż ulubione", -720, 0, -200, 200, 25, 20);
+    private Button delete1 = UiComponents.createButton("Usuń", -780, -320, -200, 200, 25, 20);
+    private Button delete2 = UiComponents.createButton("Usuń", -630, -320, -200, 200, 25, 20);
+    private Button delete3 = UiComponents.createButton("Usuń", -480, -320, -200, 200, 25, 20);
+    private Button deleteAccount = UiComponents.createButton("Usuń konto", -700, -350, -200, 200, 25, 20);
+    private Button logOut = UiComponents.createButton("Wyloguj", -550, -350, -200, 200, 25, 20);
 
     //---------------TextFields-----------------
     private TextField textRegisterPassRep = UiComponents.createTextField("Enter your password ", -620, -60, -200, 25, 200);
-    private TextField textRegisterEmail= UiComponents.createTextField("Enter your Name", -620, -100, -200, 25, 200);
+    private TextField textRegisterEmail = UiComponents.createTextField("Enter your Name", -620, -100, -200, 25, 200);
     private TextField textRegisterPass = UiComponents.createTextField("Enter your password again ", -620, -20, -200, 25, 200);
     private TextField textLoginPass = UiComponents.createTextField("Enter your password", -620, -20, -200, 25, 200);
     private TextField textLoginEmail = UiComponents.createTextField("Enter your email", -620, -70, -200, 25, 200);
     private TextField textFavoritePlace = UiComponents.createTextField("Dodaj miejsce", -620, -60, -200, 25, 200);
     GridPane gridPane = new GridPane();
+
     public Main() throws IOException {
     }
 
@@ -83,27 +87,27 @@ public class Main extends Application {
         universe.getChildren().addAll(world);
 
         buttonLogin.onActionProperty().set((ActionEvent event) -> {
-            universe.getChildren().removeAll(textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonLogin);
-            universe.getChildren().addAll(textLoginEmail,textLoginPass,buttonRegister);
+            universe.getChildren().removeAll(textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonLogin);
+            universe.getChildren().addAll(textLoginEmail, textLoginPass, buttonRegister);
             buttonLogin.setVisible(false);
             buttonRegister.setVisible(true);
         });
 
         buttonRegister.onActionProperty().set((ActionEvent event) -> {
-            universe.getChildren().removeAll(textLoginEmail,textLoginPass,buttonRegister);
-            universe.getChildren().addAll(textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonLogin);
+            universe.getChildren().removeAll(textLoginEmail, textLoginPass, buttonRegister);
+            universe.getChildren().addAll(textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonLogin);
             buttonLogin.setVisible(true);
             buttonRegister.setVisible(false);
         });
 
-        universe.getChildren().addAll(label1,label2,label3,textLoginEmail,textLoginPass,buttonRegister,buttonEnter);
+        universe.getChildren().addAll(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter);
         scene = new Scene(universe, WIDTH, HEIGHT, true);
         scene.setFill(Color.BLACK);
         scene.setCamera(camera);
 
         buttonEnter.onActionProperty().set((ActionEvent event) -> {
 
-            if(buttonRegister.isVisible()){
+            if (buttonRegister.isVisible()) {
                 //logowanie
                 String email = textLoginEmail.getText();
                 String password = textLoginPass.getText();
@@ -124,67 +128,7 @@ public class Main extends Application {
 
                     if (loginSuccessful) {
                         System.out.println("success");
-                        Logged = true;
-                        Set<Control> controls = new HashSet<>();
-                        controls.addAll(List.of(label1,label2,label3,textLoginEmail,textLoginPass,textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonRegister,buttonEnter,buttonLogin));
-                        controls.forEach(control -> {
-                            TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
-                            translateTransition.setByX(-1000);
-                            translateTransition.play();
-                            translateTransition.setOnFinished(finish ->{
-                                universe.getChildren().removeAll(controls);
-                            });
-                        });
-                        TranslateTransition lastTransition = new TranslateTransition(Duration.millis(2000), buttonLogin);
-                        lastTransition.play();
-                        lastTransition.setOnFinished(finish -> {
-                            universe.getChildren().addAll(label4);
-                            universe.getChildren().addAll(textFavoritePlace);
-                            universe.getChildren().add(buttonEnter2);
-                            universe.getChildren().add(show);
-                            universe.getChildren().add(delete1);
-                            universe.getChildren().add(delete2);
-                            universe.getChildren().add(delete3);
-                        });
-                        buttonEnter2.onActionProperty().set((ActionEvent e) ->{
-                            try {
-                                favorite(textFavoritePlace.getText(), email, universe);
-                            } catch (IOException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        });
-                        show.onActionProperty().set((ActionEvent e) ->{
-                            try {
-                                favorite("a", email, universe);
-                                show.setVisible(false);
-                            } catch (IOException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        });
-                        delete1.onActionProperty().set((ActionEvent e) ->{
-                            try {
-                                delete(0, email);
-                            } catch (IOException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        });
-                        delete2.onActionProperty().set((ActionEvent e) ->{
-                            try {
-                                delete(1, email);
-                            } catch (IOException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        });
-                        delete3.onActionProperty().set((ActionEvent e) ->{
-                            try {
-                                delete(2, email);
-                            } catch (IOException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        });
-                        sphere.setOnMouseClicked(click ->{
-                            animateCamera(camera, 1200, 400, primaryStage);
-                        });
+                        transision(universe, email, camera, primaryStage);
                     } else {
                         System.out.println("Invalid");
                     }
@@ -194,7 +138,7 @@ public class Main extends Application {
                 textLoginEmail.clear();
                 textLoginPass.clear();
 
-            }else{
+            } else {
                 //rejestracja
                 String email = textRegisterEmail.getText();
                 String password = textRegisterPass.getText();
@@ -229,12 +173,12 @@ public class Main extends Application {
                     db.writeUsers(users);
                     System.out.println("registration successful");
                     Set<Control> controls = new HashSet<>();
-                    controls.addAll(List.of(label1,label2,label3,textLoginEmail,textLoginPass,textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonRegister,buttonEnter,buttonLogin));
+                    controls.addAll(List.of(label1, label2, label3, textLoginEmail, textLoginPass, textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonRegister, buttonEnter, buttonLogin));
                     controls.forEach(control -> {
                         TranslateTransition translateTransition = new TranslateTransition(Duration.millis(2000), control);
                         translateTransition.setByX(-1000);
                         translateTransition.play();
-                        translateTransition.setOnFinished(finish ->{
+                        translateTransition.setOnFinished(finish -> {
                             universe.getChildren().removeAll(controls);
                         });
                     });
@@ -286,7 +230,7 @@ public class Main extends Application {
 
             MapView mapView = new MapView();
             mapView.setMapType(MapType.OSM);
-            mapView.setCenter(new Coordinate(52.2312,20.9897));
+            mapView.setCenter(new Coordinate(52.2312, 20.9897));
             mapView.setZoom(14);
             mapView.initialize(Configuration.builder()
                     .showZoomControls(true)
@@ -317,6 +261,7 @@ public class Main extends Application {
         earthMaterial.setBumpMap(new Image(getClass().getResource("/earth-n.jpg").toExternalForm()));
 
         sphere.setRotationAxis(Rotate.Y_AXIS);
+        sphere.setTranslateY(sphere.getTranslateY() + 100);
         sphere.setMaterial(earthMaterial);
         sphere.setTranslateZ(200);
 
@@ -325,8 +270,7 @@ public class Main extends Application {
         camera.setFarClip(1000000);
         camera.translateZProperty().set(-1600);
         camera.translateXProperty().set(-220);
-        camera.translateYProperty().set(-20);
-
+        camera.translateYProperty().set(50);
 
         return sphere;
     }
@@ -334,7 +278,7 @@ public class Main extends Application {
     private void favorite(String text, String email, Group universe) throws IOException {
         if (text.isEmpty())
             return;
-        List <String> results = Serwer.Obsluga.exist(text,email);
+        List<String> results = Serwer.Obsluga.exist(text, email);
         gridPane.setHgap(10);
         gridPane.setVgap(10);
         gridPane.setLayoutX(-800);
@@ -349,11 +293,13 @@ public class Main extends Application {
             tile.setOnAction(event -> {
                 System.out.println("Selected place: " + place);
             });
-            gridPane.add(tile, i,0);
+            gridPane.add(tile, i, 0);
         }
-        new Thread(() -> {Platform.runLater(() -> universe.getChildren().add(gridPane));
+        new Thread(() -> {
+            Platform.runLater(() -> universe.getChildren().add(gridPane));
         }).start();
     }
+
     public void delete(int ind, String mail) throws IOException {
         Node ulub = gridPane.getChildren().get(ind);
         Button tekst = (Button) ulub;
@@ -367,5 +313,114 @@ public class Main extends Application {
         user.getFavPlaces().remove(text);
         users.add(user);
         db.writeUsers(users);
+    }
+
+    public void ButtonFunctionalities(String email, Group universe) {
+        buttonEnter2.onActionProperty().set((ActionEvent e) -> {
+            try {
+                favorite(textFavoritePlace.getText(), email, universe);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        show.onActionProperty().set((ActionEvent e) -> {
+            try {
+                favorite("a", email, universe);
+                show.setVisible(false);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        delete1.onActionProperty().set((ActionEvent e) -> {
+            try {
+                delete(0, email);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        delete2.onActionProperty().set((ActionEvent e) -> {
+            try {
+                delete(1, email);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        delete3.onActionProperty().set((ActionEvent e) -> {
+            try {
+                delete(2, email);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        deleteAccount.onActionProperty().set((ActionEvent e) -> {
+            try {
+                boolean confirmed = Potwierdzenie.show("Czy na pewno chcesz usunąć konto?");
+                if (confirmed) {
+                    System.out.println("Usunięte");
+                    JsonDatabase db = new JsonDatabase();
+                    db.deleteUser(email);
+                    transisionReverse(universe);
+                } else {
+                    System.out.println("Anulowane");
+                }
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        logOut.onActionProperty().set((ActionEvent e) -> {
+            transisionReverse(universe);
+        });
+    }
+
+    public void transision(Group universe, String email, Camera camera, Stage primaryStage) {
+        Logged = true;
+        Set<Control> controls = new HashSet<>();
+        controls.addAll(List.of(label1, label2, label3, textLoginEmail, textLoginPass, textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonRegister, buttonEnter, buttonLogin));
+        controls.forEach(control -> {
+            TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
+            translateTransition.setByX(-1000);
+            translateTransition.play();
+            translateTransition.setOnFinished(finish -> universe.getChildren().remove(control));
+        });
+        Set<Control> controlsToShow = Set.of(
+                label4, textFavoritePlace, buttonEnter2, show,
+                delete1, delete2, delete3, deleteAccount, label5, logOut
+        );
+        controlsToShow.forEach(control -> {
+            TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
+            if (!first)
+                translateTransition.setByX(1000);
+            translateTransition.play();
+            translateTransition.setOnFinished(finish -> universe.getChildren().add(control));
+        });
+        ButtonFunctionalities(email, universe);
+        sphere.setOnMouseClicked(click -> animateCamera(camera, 1200, 400, primaryStage));
+        first = false;
+    }
+
+    public void transisionReverse(Group universe) {
+        Logged = false;
+        Set<Control> controlsToRemove = Set.of(
+                label4, textFavoritePlace, buttonEnter2, show,
+                delete1, delete2, delete3, deleteAccount, label5, logOut
+        );
+        controlsToRemove.forEach(control -> {
+            TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
+            translateTransition.setByX(-1000);
+            translateTransition.play();
+            translateTransition.setOnFinished(finish -> universe.getChildren().remove(control));
+        });
+        Set<Control> controlsToAdd = new HashSet<>();
+        controlsToAdd.addAll(List.of(label1, label2, label3, textLoginEmail, textLoginPass, buttonEnter, buttonRegister));
+        Set<Control> controls = new HashSet<>();
+        controls.addAll(List.of(label1, label2, label3, textLoginEmail, textLoginPass, textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonRegister, buttonEnter, buttonLogin));
+        controls.forEach(control -> {
+            TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
+            translateTransition.setByX(1000);
+            translateTransition.play();
+            if (controlsToAdd.contains(control))
+            translateTransition.setOnFinished(finish -> universe.getChildren().add(control));
+        });
+        sphere.setOnMouseClicked(null);
     }
 }

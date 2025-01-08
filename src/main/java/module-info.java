@@ -12,6 +12,7 @@ module org.example.demo {
     requires java.desktop;
     requires com.google.gson;
     requires com.sothawo.mapjfx;
+    requires com.fasterxml.jackson.databind;
 
     opens org.example.demo to javafx.fxml, com.google.gson;
     exports org.example.demo;

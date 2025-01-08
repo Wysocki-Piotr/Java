@@ -23,6 +23,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 
 import com.sothawo.mapjfx.Configuration;
@@ -86,29 +87,23 @@ public class Main extends Application {
         world.getChildren().addAll(prepareEarth(primaryStage));
         universe.getChildren().addAll(world);
 
-        buttonLogin.onActionProperty().set((ActionEvent event) -> {
-            universe.getChildren().removeAll(textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonLogin);
-            universe.getChildren().addAll(textLoginEmail, textLoginPass, buttonRegister);
-            buttonLogin.setVisible(false);
-            buttonRegister.setVisible(true);
-        });
+        buttonLogin.onActionProperty().set((ActionEvent event) -> switchToLog(universe));
 
-        buttonRegister.onActionProperty().set((ActionEvent event) -> {
-            universe.getChildren().removeAll(textLoginEmail, textLoginPass, buttonRegister);
-            universe.getChildren().addAll(textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonLogin);
-            buttonLogin.setVisible(true);
-            buttonRegister.setVisible(false);
-        });
+        buttonRegister.onActionProperty().set((ActionEvent event) -> switchToRegister(universe));
 
         universe.getChildren().addAll(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter);
         scene = new Scene(universe, WIDTH, HEIGHT, true);
         scene.setFill(Color.BLACK);
         scene.setCamera(camera);
+        primaryStage.setTitle("Main Window");
+        primaryStage.setResizable(false);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        prepareAnimation();
 
         buttonEnter.onActionProperty().set((ActionEvent event) -> {
 
             if (buttonRegister.isVisible()) {
-                //logowanie
                 String email = textLoginEmail.getText();
                 String password = textLoginPass.getText();
 
@@ -139,7 +134,6 @@ public class Main extends Application {
                 textLoginPass.clear();
 
             } else {
-                //rejestracja
                 String email = textRegisterEmail.getText();
                 String password = textRegisterPass.getText();
                 String passwordRep = textRegisterPassRep.getText();
@@ -161,30 +155,9 @@ public class Main extends Application {
                 }
 
                 try {
-                    JsonDatabase db = new JsonDatabase();
-                    List<UserScheme> users = db.readUsers();
-
-                    UserScheme newUser = new UserScheme();
-                    newUser.setEmail(email);
-                    newUser.setPassword(password);
-                    newUser.setFavPlaces(new LinkedList<String>());
-                    users.add(newUser);
-
-                    db.writeUsers(users);
-                    System.out.println("registration successful");
-                    Set<Control> controls = new HashSet<>();
-                    controls.addAll(List.of(label1, label2, label3, textLoginEmail, textLoginPass, textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonRegister, buttonEnter, buttonLogin));
-                    controls.forEach(control -> {
-                        TranslateTransition translateTransition = new TranslateTransition(Duration.millis(2000), control);
-                        translateTransition.setByX(-1000);
-                        translateTransition.play();
-                        translateTransition.setOnFinished(finish -> {
-                            universe.getChildren().removeAll(controls);
-                        });
-                    });
-
+                    register(email, password, universe);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
                 textRegisterEmail.clear();
                 textRegisterPass.clear();
@@ -192,11 +165,6 @@ public class Main extends Application {
             }
         });
 
-        primaryStage.setTitle("Main Window");
-        primaryStage.setResizable(false);
-        primaryStage.setScene(scene);
-        primaryStage.show();
-        prepareAnimation();
     }
 
     private void prepareAnimation() {
@@ -247,8 +215,6 @@ public class Main extends Application {
             primaryStage.setY(RemY);
             primaryStage.show();
         });
-
-
         timeline.play();
 
     }
@@ -422,5 +388,37 @@ public class Main extends Application {
             translateTransition.setOnFinished(finish -> universe.getChildren().add(control));
         });
         sphere.setOnMouseClicked(null);
+    }
+    public void register(String email, String password, Group universe) throws IOException {
+        JsonDatabase db = new JsonDatabase();
+        List<UserScheme> users = db.readUsers();
+        Iterator<UserScheme> iterator = users.iterator();
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+        boolean isValid = Pattern.matches(emailRegex, email);
+        if(!isValid) {
+            System.out.println("Niepoprawny format maila!");
+            return;
+        }
+        while(iterator.hasNext()){
+            if (iterator.next().getEmail() == email) {
+                System.out.println("Podany użytkownik isnieje!");
+                return;
+            }
+        }
+        users.add(new UserScheme(email, password));
+        db.writeUsers(users);
+        switchToLog(universe);
+    }
+    public void switchToRegister(Group universe){
+        universe.getChildren().removeAll(textLoginEmail, textLoginPass, buttonRegister);
+        universe.getChildren().addAll(textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonLogin);
+        buttonLogin.setVisible(true);
+        buttonRegister.setVisible(false);
+    }
+    public void switchToLog(Group universe){
+            universe.getChildren().removeAll(textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonLogin);
+            universe.getChildren().addAll(textLoginEmail, textLoginPass, buttonRegister);
+            buttonLogin.setVisible(false);
+            buttonRegister.setVisible(true);
     }
 }

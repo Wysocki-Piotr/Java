@@ -8,6 +8,12 @@ public class UserScheme {
 
     private LinkedList<String> favPlaces;
 
+    public UserScheme(String text, String text2) {
+        email = text;
+        password = text2;
+        favPlaces = new LinkedList<>();
+    }
+
     public LinkedList<String> getFavPlaces() {
         return favPlaces;
     }

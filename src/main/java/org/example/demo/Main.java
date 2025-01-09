@@ -15,11 +15,6 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
 
-        Components components = new Components(primaryStage);
-        primaryStage.setTitle("Global Weather App");
-        primaryStage.setResizable(false);
-        primaryStage.setScene(components.sceneMain);
-        primaryStage.show();
-    }
 
+    }
 }

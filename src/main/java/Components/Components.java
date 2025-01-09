@@ -31,10 +31,10 @@ import org.example.demo.Potwierdzenie;
 import java.io.IOException;
 import java.util.*;
 
-
 public class Components {
 
     protected GridPane gridPane = new GridPane();
+    private JsonDatabase db;
     protected boolean Logged = false;
     protected boolean first = true;
     protected Stage primaryStage;
@@ -65,21 +65,15 @@ public class Components {
 
     protected List<Control> registerBlock = new ArrayList<>(Arrays.asList(textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonLogin));
     protected List<Control> loginBlock = new ArrayList<>(Arrays.asList(textLoginEmail,textLoginPass,buttonRegister));
-    public List<Control> onStartBlock = new ArrayList<>(Arrays.asList(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter));
+    protected List<Control> onStartBlock = new ArrayList<>(Arrays.asList(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter));
     protected AnimationTimer timer;
 
-    private final Sphere earth = new Sphere(150);;
+    protected final Sphere earth = new Sphere(150);;
 
     public Camera camera = new PerspectiveCamera(true);
 
-
     public Group world = new Group(earth);
     public Group universe = new Group();
-
-
-
-
-
 
 
     private static final float WIDTH = 1400;
@@ -87,6 +81,17 @@ public class Components {
 
     public Scene sceneMain = new Scene(universe,WIDTH, HEIGHT, true);
     //public Scene sceneMap = new Scene();
+    public static float getHEIGHT() {
+        return HEIGHT;
+    }
+
+    public static float getWIDTH() {
+        return WIDTH;
+    }
+
+    public JsonDatabase getDb() {
+        return db;
+    }
 
     public Components(Stage primaryStage){
         this.primaryStage = primaryStage;
@@ -101,7 +106,11 @@ public class Components {
         registerFunctionality.prepareFunctionalityForRegisterBlock();
         LoginBlock loginFunctionality = new LoginBlock(this);
         loginFunctionality.prepareFunctionalityForLoginBlock();
-
+        try {
+            db = new JsonDatabase();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void prepareEarth() {
@@ -140,6 +149,104 @@ public class Components {
         timer.start();
     }
 
+
+    public void ButtonFunctionalities(String email, Group universe) {
+        buttonEnter2.onActionProperty().set((ActionEvent e) -> {
+            try {
+                favorite(textFavoritePlace.getText(), email, universe);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        show.onActionProperty().set((ActionEvent e) -> {
+            try {
+                favorite("a", email, universe);
+                show.setVisible(false);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        delete1.onActionProperty().set((ActionEvent e) -> {
+            try {
+                delete(0, email);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        delete2.onActionProperty().set((ActionEvent e) -> {
+            try {
+                delete(1, email);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        delete3.onActionProperty().set((ActionEvent e) -> {
+            try {
+                delete(2, email);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        deleteAccount.onActionProperty().set((ActionEvent e) -> {
+            try {
+                boolean confirmed = Potwierdzenie.show("Czy na pewno chcesz usunąć konto?");
+                if (confirmed) {
+                    System.out.println("Usunięte");
+                    db.deleteUser(email);
+                    transisionReverse(universe);
+                } else {
+                    System.out.println("Anulowane");
+                }
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        logOut.onActionProperty().set((ActionEvent e) -> {
+            transisionReverse(universe);
+        });
+    }
+
+
+
+    private void favorite(String text, String email, Group universe) throws IOException {
+        if (text.isEmpty())
+            return;
+        List<String> results = Serwer.Obsluga.exist(text, email);
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+        gridPane.setLayoutX(-800);
+        gridPane.setLayoutY(-300);
+        gridPane.getChildren().clear();
+        for (int i = 0; i < results.size(); i++) {
+            String place = results.get(i);
+            Button tile = new Button(place);
+            tile.setPrefSize(150, 150);
+            tile.setStyle("-fx-background-color: #FFFFFF; -fx-border-color: #39FF14;" +
+                    " -fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #1E88E5");
+            tile.setOnAction(event -> {
+                System.out.println("Selected place: " + place);
+            });
+            gridPane.add(tile, i, 0);
+        }
+        new Thread(() -> {
+            Platform.runLater(() -> universe.getChildren().add(gridPane));
+        }).start();
+    }
+
+    public void delete(int ind, String mail) throws IOException {
+        Node ulub = gridPane.getChildren().get(ind);
+        Button tekst = (Button) ulub;
+        String text = tekst.getText();
+        System.out.println(text);
+        gridPane.getChildren().remove(ulub);
+        List<UserScheme> users = db.readUsers();
+        UserScheme user = users.stream().filter(u -> u.getEmail().equals(mail)).findAny().orElse(null);
+        users.remove(user);
+        user.getFavPlaces().remove(text);
+        users.add(user);
+        db.writeUsers(users);
+    }
+
     public void transision(Group universe, String email, Camera camera, Stage primaryStage) {
         Logged = true;
         Set<Control> controls = new HashSet<>();
@@ -165,7 +272,31 @@ public class Components {
         earth.setOnMouseClicked(click -> animateCamera(camera, 1200, 400, primaryStage,false));
         first = false;
     }
-
+    public void transisionReverse(Group universe) {
+        Logged = false;
+        Set<Control> controlsToRemove = Set.of(
+                label4, textFavoritePlace, buttonEnter2, show,
+                delete1, delete2, delete3, deleteAccount, label5, logOut
+        );
+        controlsToRemove.forEach(control -> {
+            TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
+            translateTransition.setByX(-1000);
+            translateTransition.play();
+            translateTransition.setOnFinished(finish -> universe.getChildren().remove(control));
+        });
+        Set<Control> controlsToAdd = new HashSet<>();
+        controlsToAdd.addAll(List.of(label1, label2, label3, textLoginEmail, textLoginPass, buttonEnter, buttonRegister));
+        Set<Control> controls = new HashSet<>();
+        controls.addAll(List.of(label1, label2, label3, textLoginEmail, textLoginPass, textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonRegister, buttonEnter, buttonLogin));
+        controls.forEach(control -> {
+            TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
+            translateTransition.setByX(1000);
+            translateTransition.play();
+            if (controlsToAdd.contains(control))
+                translateTransition.setOnFinished(finish -> universe.getChildren().add(control));
+        });
+        earth.setOnMouseClicked(null);
+    }
     private void animateCamera(Camera camera, int duration, int frames, Stage primaryStage,boolean reverse) {
 
         Timeline timeline = new Timeline();
@@ -215,156 +346,15 @@ public class Components {
                 double RemX = primaryStage.getX();
                 double RemY = primaryStage.getY();
                 primaryStage.getY();
-                Scene mapViewScene = new Scene(root, WIDTH, HEIGHT);
+                Scene mapViewScene = new Scene(root, Components.getWIDTH(), Components.getHEIGHT());
                 primaryStage.setScene(mapViewScene);
                 primaryStage.setX(RemX);
                 primaryStage.setY(RemY);
                 primaryStage.show();
             });
-
-
             timeline.play();
         }
 
 
     }
-
-
-    public void ButtonFunctionalities(String email, Group universe) {
-        buttonEnter2.onActionProperty().set((ActionEvent e) -> {
-            try {
-                favorite(textFavoritePlace.getText(), email, universe);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        show.onActionProperty().set((ActionEvent e) -> {
-            try {
-                favorite("a", email, universe);
-                show.setVisible(false);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        delete1.onActionProperty().set((ActionEvent e) -> {
-            try {
-                delete(0, email);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        delete2.onActionProperty().set((ActionEvent e) -> {
-            try {
-                delete(1, email);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        delete3.onActionProperty().set((ActionEvent e) -> {
-            try {
-                delete(2, email);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        deleteAccount.onActionProperty().set((ActionEvent e) -> {
-            try {
-                boolean confirmed = Potwierdzenie.show("Czy na pewno chcesz usunąć konto?");
-                if (confirmed) {
-                    System.out.println("Usunięte");
-                    JsonDatabase db = new JsonDatabase();
-                    db.deleteUser(email);
-                    transisionReverse(universe);
-                } else {
-                    System.out.println("Anulowane");
-                }
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        logOut.onActionProperty().set((ActionEvent e) -> {
-            transisionReverse(universe);
-        });
-    }
-
-
-
-
-    public void transisionReverse(Group universe) {
-        Logged = false;
-        Set<Control> controlsToRemove = Set.of(
-                label4, textFavoritePlace, buttonEnter2, show,
-                delete1, delete2, delete3, deleteAccount, label5, logOut
-        );
-        controlsToRemove.forEach(control -> {
-            TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
-            translateTransition.setByX(-1000);
-            translateTransition.play();
-            translateTransition.setOnFinished(finish -> universe.getChildren().remove(control));
-        });
-        Set<Control> controlsToAdd = new HashSet<>();
-        controlsToAdd.addAll(List.of(label1, label2, label3, textLoginEmail, textLoginPass, buttonEnter, buttonRegister));
-        Set<Control> controls = new HashSet<>();
-        controls.addAll(List.of(label1, label2, label3, textLoginEmail, textLoginPass, textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonRegister, buttonEnter, buttonLogin));
-        controls.forEach(control -> {
-            TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
-            translateTransition.setByX(1000);
-            translateTransition.play();
-            if (controlsToAdd.contains(control))
-                translateTransition.setOnFinished(finish -> universe.getChildren().add(control));
-        });
-        earth.setOnMouseClicked(null);
-    }
-
-    private void favorite(String text, String email, Group universe) throws IOException {
-        if (text.isEmpty())
-            return;
-        List<String> results = Serwer.Obsluga.exist(text, email);
-        gridPane.setHgap(10);
-        gridPane.setVgap(10);
-        gridPane.setLayoutX(-800);
-        gridPane.setLayoutY(-300);
-        gridPane.getChildren().clear();
-        for (int i = 0; i < results.size(); i++) {
-            String place = results.get(i);
-            Button tile = new Button(place);
-            tile.setPrefSize(150, 150);
-            tile.setStyle("-fx-background-color: #FFFFFF; -fx-border-color: #39FF14;" +
-                    " -fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #1E88E5");
-            tile.setOnAction(event -> {
-                System.out.println("Selected place: " + place);
-            });
-            gridPane.add(tile, i, 0);
-        }
-        new Thread(() -> {
-            Platform.runLater(() -> universe.getChildren().add(gridPane));
-        }).start();
-    }
-
-    public void delete(int ind, String mail) throws IOException {
-        Node ulub = gridPane.getChildren().get(ind);
-        Button tekst = (Button) ulub;
-        String text = tekst.getText();
-        System.out.println(text);
-        gridPane.getChildren().remove(ulub);
-        JsonDatabase db = new JsonDatabase();
-        List<UserScheme> users = db.readUsers();
-        UserScheme user = users.stream().filter(u -> u.getEmail().equals(mail)).findAny().orElse(null);
-        users.remove(user);
-        user.getFavPlaces().remove(text);
-        users.add(user);
-        db.writeUsers(users);
-    }
-
-
-
-    public void prepareFunctionalityForRegisterBlock(){
-        buttonRegister.onActionProperty().set((ActionEvent event) -> {
-            universe.getChildren().removeAll(textLoginEmail, textLoginPass, buttonRegister);
-            universe.getChildren().addAll(textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonLogin);
-            buttonLogin.setVisible(true);
-            buttonRegister.setVisible(false);
-        });
-    }
-
 }

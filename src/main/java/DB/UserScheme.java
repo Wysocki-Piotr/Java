@@ -8,6 +8,9 @@ public class UserScheme {
 
     private LinkedList<String> favPlaces;
 
+    public UserScheme() {
+    }
+
     public UserScheme(String text, String text2) {
         email = text;
         password = text2;

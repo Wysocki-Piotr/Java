@@ -20,4 +20,5 @@ module org.example.demo {
     opens DB to com.google.gson, javafx.fxml;
     exports Components;
     opens Components to com.google.gson, javafx.fxml;
+    exports Serwer;
 }

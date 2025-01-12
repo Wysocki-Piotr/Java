@@ -15,7 +15,6 @@ import java.util.Set;
 
 public class LoginBlock {
 
-
     private final Components components;
 
     public LoginBlock(Components components) {
@@ -46,7 +45,7 @@ public class LoginBlock {
                 }
 
                 try {
-                    JsonDatabase db = new JsonDatabase();
+                    JsonDatabase db = components.getDb();
                     List<UserScheme> users = db.readUsers();
 
                     boolean loginSuccessful = users.stream()
@@ -87,7 +86,7 @@ public class LoginBlock {
                 }
 
                 try {
-                    JsonDatabase db = new JsonDatabase();
+                    JsonDatabase db = components.getDb();
                     List<UserScheme> users = db.readUsers();
 
                     UserScheme newUser = new UserScheme();

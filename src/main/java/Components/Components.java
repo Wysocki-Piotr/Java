@@ -11,12 +11,11 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Control;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -26,6 +25,7 @@ import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.controlsfx.control.RangeSlider;
 import org.example.demo.Potwierdzenie;
 
 import java.io.IOException;
@@ -43,6 +43,8 @@ public class Components {
     protected Label label3 = UiComponents.createLabel("App", Color.WHITE, 60, -660, -230, -200);
     protected Label label4 = UiComponents.createLabel("Dodawanie ulubionych miejsc", Color.WHITE, 30, -720, -100, -200);
     protected Label label5 = UiComponents.createLabel("ALERTY", Color.WHITE, 30, -720, 50, -200);
+    protected Label label6 = UiComponents.createLabel("Filtrowanie", Color.WHITE, 25, -300, -350,-200);
+    protected Label label7 = UiComponents.createLabel("Zakres temperatur", Color.WHITE, 10, -100, -345,-200);
     //---------------Buttons-----------------
     protected Button buttonRegister = UiComponents.createButton("Create Account", -560, 5, -200, 200, 25, 10);
     protected Button buttonLogin = UiComponents.createButton("Log in", -560, 5, -200, 200, 25, 10);
@@ -54,6 +56,7 @@ public class Components {
     protected Button delete3 = UiComponents.createButton("Usuń", -480, -320, -200, 200, 25, 20);
     protected Button deleteAccount = UiComponents.createButton("Usuń konto", -700, -350, -200, 200, 25, 20);
     protected Button logOut = UiComponents.createButton("Wyloguj", -550, -350, -200, 200, 25, 20);
+    protected Button filter = UiComponents.createButton("Filtruj", 200, -300,-200, 100, 40, 15);
 
     //---------------TextFields-----------------
     protected TextField textRegisterPassRep = UiComponents.createTextField("Enter your password ", -620, -60, -200, 25, 200);
@@ -62,10 +65,23 @@ public class Components {
     protected TextField textLoginPass = UiComponents.createTextField("Enter your password", -620, -20, -200, 25, 200);
     protected TextField textLoginEmail = UiComponents.createTextField("Enter your email", -620, -70, -200, 25, 200);
     protected TextField textFavoritePlace = UiComponents.createTextField("Dodaj miejsce", -620, -60, -200, 25, 200);
+    protected TextField textMin = UiComponents.createTextField("Podaj temperaturę min", -200, -320, -200, 25,150);
+    protected TextField textMax = UiComponents.createTextField("Podaj temperaturę max", -25, -320, -200, 25,150);
+    //-------------ComboBox-----------------
+    ObservableList<String> options = FXCollections.observableArrayList("Clear","Rain","Clouds");
+    ComboBox combo = new ComboBox<>(options);
+    Control comb = (Control) combo;
+    ComboBox comboBox = (ComboBox) UiComponents.place(comb,-300,-320,-200);
+    ObservableList<String> options2 = FXCollections.observableArrayList("US", "GB", "FR", "DE", "IT");
+    ComboBox combo2 = new ComboBox<>(options2);
+    Control comb2 = (Control) combo2;
+    ComboBox comboBoxCountries = (ComboBox) UiComponents.place(comb2,150,-320,-200);
 
     protected List<Control> registerBlock = new ArrayList<>(Arrays.asList(textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonLogin));
     protected List<Control> loginBlock = new ArrayList<>(Arrays.asList(textLoginEmail,textLoginPass,buttonRegister));
     protected List<Control> onStartBlock = new ArrayList<>(Arrays.asList(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter));
+    protected List<Control> secondBlock = new ArrayList<>(Arrays.asList(label4, textFavoritePlace, buttonEnter2, show,
+            delete1, delete2, delete3, deleteAccount, label5, logOut, comboBox, label6, label7, comboBoxCountries, filter, textMin, textMax));
     protected AnimationTimer timer;
 
     protected final Sphere earth = new Sphere(150);;
@@ -250,18 +266,16 @@ public class Components {
     public void transision(Group universe, String email, Camera camera, Stage primaryStage) {
         Logged = true;
         Set<Control> controls = new HashSet<>();
-        controls.addAll(List.of(label1, label2, label3, textLoginEmail, textLoginPass, textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonRegister, buttonEnter, buttonLogin));
+        controls.addAll(onStartBlock);
+        controls.addAll(registerBlock);
+        controls.addAll(loginBlock);
         controls.forEach(control -> {
             TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
             translateTransition.setByX(-1000);
             translateTransition.play();
             translateTransition.setOnFinished(finish -> universe.getChildren().remove(control));
         });
-        Set<Control> controlsToShow = Set.of(
-                label4, textFavoritePlace, buttonEnter2, show,
-                delete1, delete2, delete3, deleteAccount, label5, logOut
-        );
-        controlsToShow.forEach(control -> {
+        secondBlock.forEach(control -> {
             TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
             if (!first)
                 translateTransition.setByX(1000);
@@ -274,25 +288,20 @@ public class Components {
     }
     public void transisionReverse(Group universe) {
         Logged = false;
-        Set<Control> controlsToRemove = Set.of(
-                label4, textFavoritePlace, buttonEnter2, show,
-                delete1, delete2, delete3, deleteAccount, label5, logOut
-        );
-        controlsToRemove.forEach(control -> {
+        secondBlock.forEach(control -> {
             TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
             translateTransition.setByX(-1000);
             translateTransition.play();
             translateTransition.setOnFinished(finish -> universe.getChildren().remove(control));
         });
-        Set<Control> controlsToAdd = new HashSet<>();
-        controlsToAdd.addAll(List.of(label1, label2, label3, textLoginEmail, textLoginPass, buttonEnter, buttonRegister));
         Set<Control> controls = new HashSet<>();
-        controls.addAll(List.of(label1, label2, label3, textLoginEmail, textLoginPass, textRegisterEmail, textRegisterPass, textRegisterPassRep, buttonRegister, buttonEnter, buttonLogin));
+        controls.addAll(registerBlock);
+        controls.addAll(onStartBlock);
         controls.forEach(control -> {
             TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
             translateTransition.setByX(1000);
             translateTransition.play();
-            if (controlsToAdd.contains(control))
+            if (onStartBlock.contains(control))
                 translateTransition.setOnFinished(finish -> universe.getChildren().add(control));
         });
         earth.setOnMouseClicked(null);

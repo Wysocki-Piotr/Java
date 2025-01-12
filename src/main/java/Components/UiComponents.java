@@ -1,8 +1,9 @@
 package Components;
 
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.collections.ObservableList;
+import javafx.scene.Parent;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
@@ -43,5 +44,10 @@ public class UiComponents {
 
         return label;
     }
-
+    public static Object place(Parent control, int x, int y, int z){
+        control.setTranslateX(x);
+        control.setTranslateY(y);
+        control.setTranslateZ(z);
+        return control;
+    }
 }

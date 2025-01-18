@@ -1,11 +1,16 @@
 package Components;
 
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class UiComponents {
 
@@ -44,10 +49,19 @@ public class UiComponents {
 
         return label;
     }
-    public static Object place(Parent control, int x, int y, int z){
+    public static Object place(Node control, int x, int y, int z){
         control.setTranslateX(x);
         control.setTranslateY(y);
         control.setTranslateZ(z);
         return control;
+    }
+    public static ImageView createImage(int x,int y,int z){
+        ImageView img = new ImageView();
+        img.setFitWidth(20);
+        img.setFitHeight(20);
+        img.setTranslateX(x);
+        img.setTranslateX(y);
+        img.setTranslateX(z);
+        return img;
     }
 }

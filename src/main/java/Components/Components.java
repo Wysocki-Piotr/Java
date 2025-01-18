@@ -19,6 +19,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
@@ -27,9 +28,15 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.controlsfx.control.RangeSlider;
 import org.example.demo.Potwierdzenie;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+
 
 import java.io.IOException;
 import java.util.*;
+
+import static Components.UiComponents.place;
+import static Serwer.Obsluga.filterWeather;
 
 public class Components {
 
@@ -45,6 +52,9 @@ public class Components {
     protected Label label5 = UiComponents.createLabel("ALERTY", Color.WHITE, 30, -720, 50, -200);
     protected Label label6 = UiComponents.createLabel("Filtrowanie", Color.WHITE, 25, -300, -350,-200);
     protected Label label7 = UiComponents.createLabel("Zakres temperatur", Color.WHITE, 10, -100, -345,-200);
+    protected Label result1 = UiComponents.createLabel("",Color.WHITE, 10, -200, -225, -200);
+    protected Label result2 = UiComponents.createLabel("", Color.WHITE, 10, -200, -200, -200);
+    protected Label result3 = UiComponents.createLabel("", Color.WHITE, 10, -200, -175, -200);
     //---------------Buttons-----------------
     protected Button buttonRegister = UiComponents.createButton("Create Account", -560, 5, -200, 200, 25, 10);
     protected Button buttonLogin = UiComponents.createButton("Log in", -560, 5, -200, 200, 25, 10);
@@ -71,17 +81,22 @@ public class Components {
     ObservableList<String> options = FXCollections.observableArrayList("Clear","Rain","Clouds");
     ComboBox combo = new ComboBox<>(options);
     Control comb = (Control) combo;
-    ComboBox comboBox = (ComboBox) UiComponents.place(comb,-300,-320,-200);
-    ObservableList<String> options2 = FXCollections.observableArrayList("US", "GB", "FR", "DE", "IT");
+    ComboBox comboBox = (ComboBox) place(comb,-300,-320,-200);
+    ObservableList<String> options2 = FXCollections.observableArrayList( "Australia", "Iran", "China", "Canada");
     ComboBox combo2 = new ComboBox<>(options2);
     Control comb2 = (Control) combo2;
-    ComboBox comboBoxCountries = (ComboBox) UiComponents.place(comb2,150,-320,-200);
+    ComboBox comboBoxCountries = (ComboBox) place(comb2,150,-320,-200);
+    //---------------------images------------------------
+    ImageView img1 = UiComponents.createImage(-50,-225,-200);
+    ImageView img2 = UiComponents.createImage(-50,-200,-200);
+    ImageView img3 = UiComponents.createImage(-50,-175,-200);
 
     protected List<Control> registerBlock = new ArrayList<>(Arrays.asList(textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonLogin));
     protected List<Control> loginBlock = new ArrayList<>(Arrays.asList(textLoginEmail,textLoginPass,buttonRegister));
     protected List<Control> onStartBlock = new ArrayList<>(Arrays.asList(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter));
-    protected List<Control> secondBlock = new ArrayList<>(Arrays.asList(label4, textFavoritePlace, buttonEnter2, show,
-            delete1, delete2, delete3, deleteAccount, label5, logOut, comboBox, label6, label7, comboBoxCountries, filter, textMin, textMax));
+    protected List<Node> secondBlock = new ArrayList<>(Arrays.asList(label4, textFavoritePlace, buttonEnter2, show,
+            delete1, delete2, delete3, deleteAccount, label5, logOut, comboBox, label6, label7, comboBoxCountries,
+            filter, textMin, textMax, result1, result2, result3, img1, img2, img3));
     protected AnimationTimer timer;
 
     protected final Sphere earth = new Sphere(150);;
@@ -220,6 +235,49 @@ public class Components {
         logOut.onActionProperty().set((ActionEvent e) -> {
             transisionReverse(universe);
         });
+        filter.onActionProperty().set((ActionEvent e) ->{
+            double wartosc1 = -100;
+            double wartosc2 = 100;
+            if (!textMin.getText().equals(""))
+                wartosc1 = Double.parseDouble(textMin.getText());
+            if(!textMax.getText().equals(""))
+                wartosc2 = Double.parseDouble(textMax.getText());
+            try {
+                if (wartosc2 <= wartosc1)
+                    throw new Exception("Podaj poprawny zakres!");
+            } catch (NumberFormatException ex) {
+                System.out.println("Podaj wartość liczbową!");
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+            try {
+                Map mapa = filterWeather((String) comboBox.getValue(),(String) comboBoxCountries.getValue(), wartosc1, wartosc2);
+                result1.setVisible(true);
+                result2.setVisible(true);
+                result3.setVisible(true);
+                img1.setVisible(false);
+                img2.setVisible(false);
+                img3.setVisible(false);
+                String r1 = (String) mapa.keySet().stream().skip(0).findFirst().orElse("");
+                String r2 = (String) mapa.keySet().stream().skip(1).findFirst().orElse("");
+                String r3 = (String) mapa.keySet().stream().skip(2).findFirst().orElse("");
+                result1.setText(r1);
+                result2.setText(r2);
+                result3.setText(r3);
+                //obsluzyc gdy url null
+                img1.setImage(new Image((String) mapa.values().stream().findFirst().orElse(null)));
+                img2.setImage(new Image((String) mapa.values().stream().skip(1).findFirst().orElse(null)));
+                img3.setImage(new Image((String) mapa.values().stream().skip(2).findFirst().orElse(null)));
+                place(img1, -250, -225, -200);
+                place(img2, -250, -200, -200);
+                place(img3, -250, -175, -200);
+                img1.setVisible(true);
+                img2.setVisible(true);
+                img3.setVisible(true);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
     }
 
 
@@ -285,6 +343,9 @@ public class Components {
         ButtonFunctionalities(email, universe);
         earth.setOnMouseClicked(click -> animateCamera(camera, 1200, 400, primaryStage,false));
         first = false;
+        result1.setVisible(false);
+        result1.setVisible(false);
+        result1.setVisible(false);
     }
     public void transisionReverse(Group universe) {
         Logged = false;

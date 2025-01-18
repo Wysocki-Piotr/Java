@@ -3,15 +3,19 @@ import DB.JsonDatabase;
 import DB.UserScheme;
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javafx.scene.Scene;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class Obsluga {
     private final static String apiKey = "e95fb7ea6cda081ad055c8bfdcdb3e5d";
@@ -51,8 +55,7 @@ public class Obsluga {
         return conn;
     }
 
-    public static WeatherResponse apiAnswerByLat(double lat, double lon) throws IOException {
-        HttpURLConnection conn = createByLatLon(lat, lon);
+    public static WeatherResponse apiAnswer(HttpURLConnection conn) throws IOException {
         conn.setRequestMethod("GET");
         BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         StringBuilder response = new StringBuilder();
@@ -61,9 +64,53 @@ public class Obsluga {
             response.append(inputLine);
         }
         in.close();
-        System.out.println(response);
         Gson gson = new Gson();
         WeatherResponse outcome = gson.fromJson(String.valueOf(response), WeatherResponse.class);
         return outcome;
+    }
+    public static Map<String, String> filterWeather(String comb, String country, double min, double max) throws IOException {
+        Map <String, String> mapa = returnCitiesMap();
+        List<String> listaKluczy = mapa.entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().equals(country))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+        Map <String, String> filtered = new HashMap<>();
+        for (String city: listaKluczy){
+            HttpURLConnection conn = createByName(city);
+            WeatherResponse outcome = apiAnswer(conn); //napisac wyjatek jesli dany kraj nie dziala (blad 400)
+            if (outcome.weather[0].main.equals(comb) && min <= outcome.main.temp && outcome.main.temp <= max) {
+                String url = "https://openweathermap.org/img/wn/" + outcome.weather[0].icon + "@2x.png";
+                filtered.put(city, url);
+            }
+        }
+        Map<String, String> limitedMap = filtered.entrySet()
+                .stream()
+                .limit(3)
+                .collect(Collectors.toMap(
+                entry -> entry.getKey(),
+                entry -> entry.getValue()
+        ));
+        System.out.println(filtered);
+        return filtered;
+    }
+
+    public static Map<String, String> returnCitiesMap() throws IOException {
+        File file = new File("src/main/java/Serwer/cities_list.xlsx");
+        FileInputStream fis = new FileInputStream(file);
+        Workbook workbook = WorkbookFactory.create(fis);
+        Sheet sheet = workbook.getSheetAt(0);
+        Map<String, String> cityCountryMap = new HashMap<>();
+        for (Row row : sheet) {
+            Cell cityCell = row.getCell(0);
+            Cell countryCell = row.getCell(3);
+            if (cityCell != null && countryCell != null) {
+                String city = cityCell.getStringCellValue();
+                String country = countryCell.getStringCellValue();
+                cityCountryMap.put(city, country);
+            }
+        }
+        fis.close();
+        return cityCountryMap;
     }
 }

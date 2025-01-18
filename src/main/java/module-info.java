@@ -13,6 +13,8 @@ module org.example.demo {
     requires com.google.gson;
     requires com.sothawo.mapjfx;
     requires com.fasterxml.jackson.databind;
+    requires org.apache.poi.poi;
+    requires org.apache.poi.ooxml;
 
     opens org.example.demo to javafx.fxml, com.google.gson;
     exports org.example.demo;

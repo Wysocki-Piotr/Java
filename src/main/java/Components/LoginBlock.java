@@ -4,7 +4,10 @@ import DB.JsonDatabase;
 import DB.UserScheme;
 import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
+import javafx.scene.Camera;
+import javafx.scene.Group;
 import javafx.scene.control.Control;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
@@ -97,19 +100,12 @@ public class LoginBlock {
 
                     db.writeUsers(users);
                     System.out.println("registration successful");
-                    Set<Control> controls = new HashSet<>();
-                    controls.addAll(List.of(components.label1, components.label2, components.label3, components.textLoginEmail, components.textLoginPass,
-                            components.textRegisterEmail, components.textRegisterPass, components.textRegisterPassRep,
-                            components.buttonRegister,components.buttonEnter, components.buttonLogin));
-                    controls.forEach(control -> {
-                        TranslateTransition translateTransition = new TranslateTransition(Duration.millis(2000), control);
-                        translateTransition.setByX(-1000);
-                        translateTransition.play();
-                        translateTransition.setOnFinished(finish -> {
-                            components.universe.getChildren().removeAll(controls);
-                        });
-                    });
-
+                    components.universe.getChildren().removeAll(components.textRegisterEmail, components.textRegisterPass,
+                            components.textRegisterPassRep, components.buttonLogin);
+                    components.universe.getChildren().addAll(components.textLoginEmail, components.textLoginPass,
+                            components.buttonRegister);
+                    components.buttonLogin.setVisible(false);
+                    components.buttonRegister.setVisible(true);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

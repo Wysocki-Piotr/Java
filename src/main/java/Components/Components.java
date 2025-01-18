@@ -126,12 +126,11 @@ public class Components {
 
     public Components(Stage primaryStage){
         this.primaryStage = primaryStage;
-        universe.getChildren().addAll(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter,world);
+        universe.getChildren().addAll(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter, world);
         prepareCamera();
         prepareEarth();
         prepareSceneMain();
         prepareAnimation();
-
 
         RegisterBlock registerFunctionality = new RegisterBlock(this);
         registerFunctionality.prepareFunctionalityForRegisterBlock();
@@ -424,7 +423,5 @@ public class Components {
             });
             timeline.play();
         }
-
-
     }
 }

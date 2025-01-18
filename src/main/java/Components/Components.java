@@ -264,9 +264,9 @@ public class Components {
                 result2.setText(r2);
                 result3.setText(r3);
                 //obsluzyc gdy url null
-                img1.setImage(new Image((String) mapa.values().stream().findFirst().orElse(null)));
-                img2.setImage(new Image((String) mapa.values().stream().skip(1).findFirst().orElse(null)));
-                img3.setImage(new Image((String) mapa.values().stream().skip(2).findFirst().orElse(null)));
+                img1.setImage(new Image((String) mapa.values().stream().findFirst().orElse("https://via.placeholder.com/1x1/000000")));
+                img2.setImage(new Image((String) mapa.values().stream().skip(1).findFirst().orElse("https://via.placeholder.com/1x1/000000")));
+                img3.setImage(new Image((String) mapa.values().stream().skip(2).findFirst().orElse("https://via.placeholder.com/1x1/000000")));
                 place(img1, -250, -225, -200);
                 place(img2, -250, -200, -200);
                 place(img3, -250, -175, -200);

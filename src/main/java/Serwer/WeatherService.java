@@ -5,20 +5,24 @@ import com.google.gson.Gson;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javafx.scene.Scene;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-public class Obsluga {
-    private final static String apiKey = "e95fb7ea6cda081ad055c8bfdcdb3e5d";
+public class WeatherService {
+    private final static String apiKey;
+
+    static {
+        try {
+            apiKey = Config.getApiKey();
+        } catch (IOException e) {
+            System.out.println("Problemy z kluczem API");
+            throw new RuntimeException();
+        }
+    }
 
     public static List<String> exist(String location, String nick) throws IOException {
         HttpURLConnection conn = createByName(location);

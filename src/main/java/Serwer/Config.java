@@ -7,7 +7,7 @@ import java.util.Properties;
 public class Config {
     public static String getApiKey() throws IOException {
         Properties properties = new Properties();
-        properties.load(new FileInputStream("config.properties"));
+        properties.load(new FileInputStream("src/main/resources/config.properties"));
         return properties.getProperty("api.key");
     }
 }

@@ -5,6 +5,7 @@ import DB.JsonDatabase;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import java.io.IOException;
+import Components.AlertManagement;
 
 
 public class Main extends Application {
@@ -19,5 +20,8 @@ public class Main extends Application {
         primaryStage.setResizable(false);
         primaryStage.setScene(components.sceneMain);
         primaryStage.show();
+        AlertManagement alert = new AlertManagement(components);
+        alert.scheduleTemperatureCheck();
     }
+
 }

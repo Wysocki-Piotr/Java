@@ -20,8 +20,10 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
@@ -101,7 +103,7 @@ public class Components {
             filter, textMin, textMax, result1, result2, result3, img1, img2, img3, alert1, alert2, alert3));
     protected AnimationTimer timer;
 
-    protected final Sphere earth = new Sphere(150);;
+    protected final Sphere earth = new Sphere(150);
 
     public Camera camera = new PerspectiveCamera(true);
 
@@ -134,9 +136,12 @@ public class Components {
         prepareSceneMain();
         prepareAnimation();
 
+
+
         RegisterBlock registerFunctionality = new RegisterBlock(this);
         registerFunctionality.prepareFunctionalityForRegisterBlock();
         LoginBlock loginFunctionality = new LoginBlock(this);
+        MapViewComponents mapViewComponents = new MapViewComponents(this);
         loginFunctionality.prepareFunctionalityForLoginBlock();
         try {
             db = new JsonDatabase();
@@ -354,7 +359,7 @@ public class Components {
             translateTransition.setOnFinished(finish -> universe.getChildren().add(control));
         });
         buttonFunctionalities(email, universe);
-        earth.setOnMouseClicked(click -> animateCamera(camera, 1200, 400, primaryStage,false));
+        earth.setOnMouseClicked(click -> animateCamera(camera, 1200, 400, false));
         first = false;
         result1.setVisible(false);
         result1.setVisible(false);
@@ -380,62 +385,66 @@ public class Components {
         });
         earth.setOnMouseClicked(null);
     }
-    private void animateCamera(Camera camera, int duration, int frames, Stage primaryStage,boolean reverse) {
+    public void animateCamera(Camera camera, int duration, int frames,boolean reverse) {
 
         Timeline timeline = new Timeline();
-
-        if(reverse){
-            double startX = earth.getTranslateX();
-            double startZ = earth.getTranslateZ();
-            double controlZ = startZ + 2000;
+        if (reverse) {
+            double startX = 0;
+            double startY = 100;
+            double startZ = 200;
+            double controlZ = startZ+2000;
             for (int i = 0; i <= frames; i++) {
                 double t = (double) i / frames;
-                double x = (1 - t) * startX + t * 0.5;
+                double x = (1 - t) * startX + t * (-220);
+                double y = (1 - t) * startY + t * (-20);
                 double z = (1 - t) * (1 - t) * startZ + 2 * (1 - t) * t * controlZ + t * t * (-1600);
-                KeyFrame keyFrame = new KeyFrame(Duration.millis(t * duration), event -> {
+                KeyFrame keyFrame = new KeyFrame(Duration.millis(t * duration), event1 -> {
                     camera.setTranslateX(x);
+                    camera.setTranslateY(y);
                     camera.setTranslateZ(z);
                 });
                 timeline.getKeyFrames().add(keyFrame);
+//                camera.translateZProperty().set(-1600);
+//                camera.translateXProperty().set(-220);
+//                camera.translateYProperty().set(-20);
+//                System.out.println(x);
+//                System.out.println(y);
+//                System.out.println(z);
+//                System.out.println(camera.getTranslateZ());
+//                System.out.println(camera.getTranslateX());
+//                System.out.println(camera.getTranslateY());
             }
+            timeline.play();
 
-        }else{
+        }
+        else{
+
             double startX = camera.getTranslateX();
+            double startY = camera.getTranslateY();
             double startZ = camera.getTranslateZ();
             double controlZ = startZ - 2000;
             for (int i = 0; i <= frames; i++) {
+
                 double t = (double) i / frames;
-                double x = (1 - t) * startX + t * 0.5;
-                double z = (1 - t) * (1 - t) * startZ + 2 * (1 - t) * t * controlZ + t * t * (200);
+                double x = (1 - t) * startX + t * earth.getTranslateX();
+                double y = (1 - t) * startY + t * earth.getTranslateY();
+                double z = (1 - t) * (1 - t) * startZ + 2 * (1 - t) * t * controlZ + t * t * earth.getTranslateY();
                 KeyFrame keyFrame = new KeyFrame(Duration.millis(t * duration), event -> {
                     camera.setTranslateX(x);
                     camera.setTranslateZ(z);
+                    camera.setTranslateY(y);
                 });
                 timeline.getKeyFrames().add(keyFrame);
             }
-
+            System.out.println(earth.getTranslateZ());
+            System.out.println(earth.getTranslateX());
+            System.out.println(earth.getTranslateY());
             timeline.setOnFinished(event -> {
 
-                MapView mapView = new MapView();
-                mapView.setMapType(MapType.OSM);
-                mapView.setCenter(new Coordinate(52.2312, 20.9897));
-                mapView.setZoom(14);
-                mapView.initialize(Configuration.builder()
-                        .showZoomControls(true)
-                        .build());
-
-                BorderPane root = new BorderPane();
-                root.setCenter(mapView);
-                double RemX = primaryStage.getX();
-                double RemY = primaryStage.getY();
-                primaryStage.getY();
-                Scene mapViewScene = new Scene(root, Components.getWIDTH(), Components.getHEIGHT());
-                primaryStage.setScene(mapViewScene);
-                primaryStage.setX(RemX);
-                primaryStage.setY(RemY);
-                primaryStage.show();
+                MapViewComponents mapViewComponents = new MapViewComponents(this);
             });
             timeline.play();
         }
     }
+
 }

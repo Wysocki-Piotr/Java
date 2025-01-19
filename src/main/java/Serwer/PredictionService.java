@@ -23,7 +23,7 @@ public class PredictionService {
             throw new RuntimeException();
         }
     }
-    public static WeatherForecast readByName(double lat, double lon) throws IOException {
+    public static WeatherForecast readByLatlon(double lat, double lon) throws IOException {
         String urlString = "api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&appid=" +apiKey +"&units=metric";
         URL url = new URL(urlString);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();

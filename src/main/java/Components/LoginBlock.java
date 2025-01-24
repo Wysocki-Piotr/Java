@@ -2,19 +2,11 @@ package Components;
 
 import DB.JsonDatabase;
 import DB.UserScheme;
-import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
-import javafx.scene.Camera;
-import javafx.scene.Group;
-import javafx.scene.control.Control;
-import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public class LoginBlock {
 

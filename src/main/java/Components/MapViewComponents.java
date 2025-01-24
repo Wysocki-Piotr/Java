@@ -1,5 +1,7 @@
 package Components;
 
+import Serwer.WeatherResponse;
+import Serwer.WeatherService;
 import com.sothawo.mapjfx.Configuration;
 import com.sothawo.mapjfx.Coordinate;
 import com.sothawo.mapjfx.MapType;
@@ -8,27 +10,30 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+
 public class MapViewComponents {
 
     private final Components components;
     private MapView mapView;
-    private BorderPane borderPane;
     private StackPane stackPane;
     private Button showButton;
     private TextField xField;
     private TextField yField;
     private Button moveBackButton;
+    private WeatherService weatherService;
 
     public MapViewComponents(Components components) {
         this.components = components;
         initializeMapView(components.primaryStage);
-        setCordinatesPanel();
+
+        setPanelLayout();
         setButtonsFunctionalities();
     }
 
@@ -59,7 +64,7 @@ public class MapViewComponents {
         primaryStage.show();
     }
 
-    private void setCordinatesPanel() {
+    private void setPanelLayout() {
         Label enterLabel = UiComponents.createLabel("Podaj koordynaty", Color.WHITE, 30, 470, -420, 0);
         stackPane.getChildren().add(enterLabel);
 
@@ -87,6 +92,30 @@ public class MapViewComponents {
         yField.setTranslateX(470);
         stackPane.getChildren().add(yField);
 
+        //---------------------Weather Data---------------------
+
+        Label weatherLabel = UiComponents.createLabel("Temperatura:", Color.WHITE, 15, 340, -270, 0);
+        stackPane.getChildren().add(weatherLabel);
+        //weatherLabel.setVisible(false);
+
+        Label timeLabel = UiComponents.createLabel("Czas:", Color.WHITE, 15, 313, -240, 0);
+        stackPane.getChildren().add(timeLabel);
+        //timeLabel.setVisible(false);
+
+        Label windLabel = UiComponents.createLabel("Wiatr:", Color.WHITE, 15, 313, -210, 0);
+        stackPane.getChildren().add(windLabel);
+        //windLabel.setVisible(false);
+
+        Label pressureLabel = UiComponents.createLabel("Ciśnienie:", Color.WHITE, 15, 328, -180, 0);
+        stackPane.getChildren().add(pressureLabel);
+        //pressureLabel.setVisible(false);
+
+        Label humidityLabel = UiComponents.createLabel("Wilgotność:", Color.WHITE, 15, 333, -150, 0);
+        stackPane.getChildren().add(humidityLabel);
+        //humidityLabel.setVisible(false);
+
+
+
         showButton = new Button("Przenieść do miejsca na mapie");
         showButton.setTranslateY(-300);
         showButton.setTranslateX(470);
@@ -106,7 +135,6 @@ public class MapViewComponents {
                 //TODO: throw exception
             }
         });
-
         moveBackButton.setOnAction(event -> {
 
             components.primaryStage.setScene(components.sceneMain);
@@ -150,6 +178,12 @@ public class MapViewComponents {
 
     }
 
+    private void getWeatherDataFromAPI(double x,double y) throws IOException {
+        HttpURLConnection conn =WeatherService.createByLatLon(x, y);
+        WeatherResponse weatherResponse = WeatherService.apiAnswer(conn);
+        System.out.println(weatherResponse.coord.lat);
+    }
+
     private void setCoordinates(double x, double y) {
         mapView.setCenter(new Coordinate(x, y));
     }
@@ -171,6 +205,12 @@ public class MapViewComponents {
             return -Double.parseDouble(userCoordinateY.substring(0, userCoordinateY.length()-1));
         }
     }
+
+    private void displayWeatherAPIResponse(){
+        //TODO Display weather data from API
+    }
+
+
 
 
 

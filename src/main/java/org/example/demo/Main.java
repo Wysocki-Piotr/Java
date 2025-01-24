@@ -4,7 +4,7 @@ import Components.Components;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import java.io.IOException;
-import Components.AlertManagement;
+import Alert.AlertManagement;
 
 
 public class Main extends Application {

@@ -15,6 +15,7 @@ module org.example.demo {
     requires com.fasterxml.jackson.databind;
     requires org.apache.poi.poi;
     requires org.apache.poi.ooxml;
+    requires org.json;
 
     opens org.example.demo to javafx.fxml, com.google.gson;
     exports org.example.demo;
@@ -23,4 +24,6 @@ module org.example.demo {
     exports Components;
     opens Components to com.google.gson, javafx.fxml;
     exports Serwer;
+    exports Alert;
+    opens Alert to com.google.gson, javafx.fxml;
 }

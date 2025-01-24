@@ -295,7 +295,7 @@ public class Components {
         else
             alert2.setText("Jutro mocny wiatr!");
         if(lista[2].equals(false))
-            alert3.setText("Brak alertów z opadami");
+            alert3.setText("Brak alertów z opadami!");
         else
             alert3.setText("Jutro silne opady deszczu!");
     }

@@ -16,6 +16,7 @@ module org.example.demo {
     requires org.apache.poi.poi;
     requires org.apache.poi.ooxml;
     requires org.json;
+    requires org.apache.pdfbox;
 
     opens org.example.demo to javafx.fxml, com.google.gson;
     exports org.example.demo;

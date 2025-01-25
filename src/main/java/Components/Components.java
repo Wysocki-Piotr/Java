@@ -3,14 +3,7 @@ package Components;
 import DB.JsonDatabase;
 import DB.UserScheme;
 import Serwer.WeatherService;
-import com.sothawo.mapjfx.Configuration;
-import com.sothawo.mapjfx.Coordinate;
-import com.sothawo.mapjfx.MapType;
-import com.sothawo.mapjfx.MapView;
-import javafx.animation.AnimationTimer;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.animation.TranslateTransition;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,12 +11,9 @@ import javafx.event.ActionEvent;
 import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
@@ -115,7 +105,6 @@ public class Components {
     private static final float HEIGHT = 1000;
 
     public Scene sceneMain = new Scene(universe,WIDTH, HEIGHT, true);
-    //public Scene sceneMap = new Scene();
     public static float getHEIGHT() {
         return HEIGHT;
     }
@@ -141,7 +130,7 @@ public class Components {
         RegisterBlock registerFunctionality = new RegisterBlock(this);
         registerFunctionality.prepareFunctionalityForRegisterBlock();
         LoginBlock loginFunctionality = new LoginBlock(this);
-        MapViewComponents mapViewComponents = new MapViewComponents(this);
+        //MapViewComponents mapViewComponents = new MapViewComponents(this);
         loginFunctionality.prepareFunctionalityForLoginBlock();
         try {
             db = new JsonDatabase();
@@ -359,7 +348,11 @@ public class Components {
             translateTransition.setOnFinished(finish -> universe.getChildren().add(control));
         });
         buttonFunctionalities(email, universe);
-        earth.setOnMouseClicked(click -> animateCamera(camera, 1200, 400, false));
+
+        PauseTransition pause = new PauseTransition(Duration.seconds(1.5));
+        pause.setOnFinished(event -> earth.setOnMouseClicked(click -> animateCamera(camera, 1200, 400, false)));
+        pause.play();
+
         first = false;
         result1.setVisible(false);
         result1.setVisible(false);
@@ -404,15 +397,6 @@ public class Components {
                     camera.setTranslateZ(z);
                 });
                 timeline.getKeyFrames().add(keyFrame);
-//                camera.translateZProperty().set(-1600);
-//                camera.translateXProperty().set(-220);
-//                camera.translateYProperty().set(-20);
-//                System.out.println(x);
-//                System.out.println(y);
-//                System.out.println(z);
-//                System.out.println(camera.getTranslateZ());
-//                System.out.println(camera.getTranslateX());
-//                System.out.println(camera.getTranslateY());
             }
             timeline.play();
 

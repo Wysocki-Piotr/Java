@@ -49,6 +49,7 @@ public class LoginBlock {
                     if (loginSuccessful) {
                         System.out.println("success");
                         components.transision(components.universe, email, components.camera, components.primaryStage);
+
                     } else {
                         System.out.println("Invalid");
                     }
@@ -104,6 +105,7 @@ public class LoginBlock {
                 components.textRegisterEmail.clear();
                 components.textRegisterPass.clear();
                 components.textRegisterPassRep.clear();
+
             }
         });
 

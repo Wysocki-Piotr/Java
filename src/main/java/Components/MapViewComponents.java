@@ -1,7 +1,9 @@
 package Components;
 
+import Alert.Localization;
 import Serwer.WeatherResponse;
 import Serwer.WeatherService;
+import com.almasb.fxgl.localization.LocalizationService;
 import com.sothawo.mapjfx.Configuration;
 import com.sothawo.mapjfx.Coordinate;
 import com.sothawo.mapjfx.MapType;
@@ -13,6 +15,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -28,6 +31,7 @@ public class MapViewComponents {
     private TextField yField;
     private Button moveBackButton;
     private WeatherService weatherService;
+    private Button currentLocationWeatherButton;
 
     public MapViewComponents(Components components) {
         this.components = components;
@@ -68,7 +72,7 @@ public class MapViewComponents {
         Label enterLabel = UiComponents.createLabel("Podaj koordynaty", Color.WHITE, 30, 470, -420, 0);
         stackPane.getChildren().add(enterLabel);
 
-        moveBackButton = UiComponents.createButton("Wróć", 630, 440, 0, 70, 35, 20);
+        moveBackButton = UiComponents.createButton("Wróć", 610, 440, 0, 70, 35, 15);
         stackPane.getChildren().add(moveBackButton);
 
         Label xLabel = UiComponents.createLabel("X:", Color.WHITE, 22, 320, -370, 0);
@@ -114,6 +118,8 @@ public class MapViewComponents {
         stackPane.getChildren().add(humidityLabel);
         //humidityLabel.setVisible(false);
 
+        currentLocationWeatherButton = UiComponents.createButton("Pokaż pogode w swojej lokalizacji", 410, 440, 0, 300, 35, 15);
+        stackPane.getChildren().add(currentLocationWeatherButton);
 
 
         showButton = new Button("Przenieść do miejsca na mapie");
@@ -141,6 +147,36 @@ public class MapViewComponents {
             components.animateCamera(components.camera, 900, 400, true);
 
         });
+        currentLocationWeatherButton.setOnAction(event ->{
+            double[] curCoordinates = Localization.getCurrentLocalizationByApi();
+            setCoordinates(curCoordinates[0], curCoordinates[1]);
+        });
+
+        stackPane.setOnMouseClicked(event -> {
+            //System.out.println(event.getTarget().getClass());
+            if(event.getTarget() instanceof WebView){
+                double xCoordinate = event.getScreenX();
+                double yCoordinate = event.getScreenY();
+
+                Coordinate coordinate = screenToMapCoordinate(xCoordinate, yCoordinate);
+                if (coordinate != null) {
+                    System.out.println("Coordinates: " + coordinate.getLatitude() + ", " + coordinate.getLongitude());
+                } else {
+                    System.out.println("Could not get coordinates");
+                }
+
+            }else{
+                System.out.println("nie plansza");
+            }
+        });
+    }
+    private Coordinate screenToMapCoordinate(double x, double y) {
+
+        double mapX = (x - mapView.getLayoutX()) / mapView.getWidth();
+        double mapY = (y - mapView.getLayoutY()) / mapView.getHeight();
+        double longitude = mapView.getCenter().getLongitude() + (mapX - 0.5) * 360 / Math.pow(2, mapView.getZoom());
+        double latitude = mapView.getCenter().getLatitude() - (mapY - 0.5) * 180 / Math.pow(2, mapView.getZoom());
+        return new Coordinate(latitude, longitude);
     }
 
     private static class CoordinateValidator {
@@ -186,6 +222,7 @@ public class MapViewComponents {
 
     private void setCoordinates(double x, double y) {
         mapView.setCenter(new Coordinate(x, y));
+        mapView.setZoom(11);
     }
 
     private double translateUserCoordinatesToProperTypeX(String userCoordinateX) {

@@ -12,6 +12,7 @@ import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
@@ -50,10 +51,10 @@ public class Components {
     protected Label alert2 = UiComponents.createLabel("Brak alertów z wiatrem",Color.WHITE, 20, -700,150, -200);
     protected Label alert3 = UiComponents.createLabel("Brak alertów z opadami",Color.WHITE, 20, -700,200, -200);
     //---------------Buttons-----------------
-    protected Button buttonRegister = UiComponents.createButton("Create Account", -560, 5, -200, 200, 25, 10);
-    protected Button buttonLogin = UiComponents.createButton("Log in", -560, 5, -200, 200, 25, 10);
-    protected Button buttonEnter = UiComponents.createButton("Enter", -600, 30, -200, 200, 25, 20);
-    protected Button buttonEnter2 = UiComponents.createButton("Enter", -620, -30, -200, 200, 25, 20);
+    protected Button buttonRegister = UiComponents.createButton("Create Account", -500, 5, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 10);
+    protected Button buttonLogin = UiComponents.createButton("Log in", -470, 5, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 10);
+    protected Button buttonEnter = UiComponents.createButton("Enter", -550, 30, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 20);
+    protected Button buttonEnter2 = UiComponents.createButton("Enter", -620, -30, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 20);
     protected Button show = UiComponents.createButton("Pokaż ulubione", -720, 0, -200, 200, 25, 20);
     protected Button delete1 = UiComponents.createButton("Usuń", -780, -320, -200, 200, 25, 20);
     protected Button delete2 = UiComponents.createButton("Usuń", -630, -320, -200, 200, 25, 20);

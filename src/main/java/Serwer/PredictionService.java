@@ -7,10 +7,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.text.PDFTextStripper;
 
 public class PredictionService {
     private final static String apiKey;
@@ -44,7 +50,7 @@ public class PredictionService {
         URL url = new URL(urlString);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
-        int responseCode = conn.getResponseCode();
+        // int responseCode = conn.getResponseCode();
         BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         StringBuilder response = new StringBuilder();
         String inputLine;
@@ -63,13 +69,82 @@ public class PredictionService {
     }
     public static Boolean checkWindAlert(double lat, double lon, long currentTime){
         WeatherForecast.Forecast forecast = checkForecast(lat, lon, currentTime);
-        if (forecast.wind.speed > 0) return true;
+        if (forecast.wind.speed > 20) return true;
         return false;
     }
     public static Boolean checkRainAlert(double lat, double lon, long currentTime){
         WeatherForecast.Forecast forecast = checkForecast(lat, lon, currentTime);
         if (forecast.rain != null && forecast.rain._3h > 20) return true;
         return false;
+    }
+    public static void save(double[] coord) throws IOException {
+
+        WeatherForecast toSave = readByLatlon(coord[0], coord[1]);
+
+        PDDocument document = new PDDocument();
+        PDPage page = new PDPage();
+        document.addPage(page);
+
+        PDPageContentStream contentStream = new PDPageContentStream(document, page);
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+        contentStream.newLineAtOffset(50, 750);
+
+        contentStream.showText("Weather Forecast for " + toSave.city.name + ", " + toSave.city.country);
+        contentStream.newLineAtOffset(-35, -20);
+
+        Map<String, StringBuilder> dailyForecasts = groupForecastsByDay(toSave.list);
+
+        for (Map.Entry<String, StringBuilder> entry : dailyForecasts.entrySet()) {
+            String date = entry.getKey();
+            String forecastDetails = entry.getValue().toString();
+            forecastDetails = forecastDetails.replace("\r", "");
+
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
+            contentStream.showText(date);
+            contentStream.newLineAtOffset(0, -15);
+            contentStream.setFont(PDType1Font.HELVETICA, 12);
+
+            for (String line : forecastDetails.split("\n")) {
+                contentStream.showText(line);
+                contentStream.newLineAtOffset(0, -15);
+            }
+            contentStream.newLineAtOffset(0, -10);
+        }
+
+        contentStream.endText();
+        contentStream.close();
+
+        document.save("weather_forecast.pdf");
+        document.close();
+    }
+
+    private static Map<String, StringBuilder> groupForecastsByDay(List<WeatherForecast.Forecast> forecasts) {
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        Map<String, StringBuilder> dailyForecasts = new TreeMap<>();
+
+        for (WeatherForecast.Forecast forecast : forecasts) {
+
+            Date date = new Date(forecast.dt * 1000);
+            String day = dateFormat.format(date);
+            String details = String.format(
+                    "  Time: %tR | Temp: %.1f°C | Humidity: %d%% | Weather: %s | Wind: %.1f m/s | Pressure: %d hPa%n",
+                    date, forecast.main.temp, forecast.main.humidity, forecast.weather.get(0).description,
+                    forecast.wind.speed, forecast.main.pressure);
+
+            dailyForecasts.computeIfAbsent(day, k -> new StringBuilder());
+            dailyForecasts.get(day).append(details);
+        }
+        Iterator<String> iterator = dailyForecasts.keySet().iterator();
+        if (iterator.hasNext()) {
+            String firstKey = iterator.next();
+            dailyForecasts.remove(firstKey);
+        }
+
+        return dailyForecasts;
     }
 
 }

@@ -2,6 +2,8 @@ package Components;
 
 import DB.JsonDatabase;
 import DB.UserScheme;
+import Serwer.PredictionService;
+import Serwer.WeatherForecast;
 import Serwer.WeatherService;
 import javafx.animation.*;
 import javafx.application.Platform;
@@ -23,14 +25,17 @@ import javafx.scene.image.ImageView;
 
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static Components.UiComponents.place;
 import static Serwer.WeatherService.filterWeather;
+import static Alert.Localization.getCurrentLocalizationByApi;
 
 public class Components {
 
     protected GridPane gridPane = new GridPane();
+    protected GridPane gridPane2 = new GridPane();
     private JsonDatabase db;
     protected boolean Logged = false;
 
@@ -55,12 +60,10 @@ public class Components {
     protected Button buttonEnter = UiComponents.createButton("Enter", -600, 30, -200, 200, 25, 20);
     protected Button buttonEnter2 = UiComponents.createButton("Enter", -620, -30, -200, 200, 25, 20);
     protected Button show = UiComponents.createButton("Pokaż ulubione", -720, 0, -200, 200, 25, 20);
-    protected Button delete1 = UiComponents.createButton("Usuń", -780, -320, -200, 200, 25, 20);
-    protected Button delete2 = UiComponents.createButton("Usuń", -630, -320, -200, 200, 25, 20);
-    protected Button delete3 = UiComponents.createButton("Usuń", -480, -320, -200, 200, 25, 20);
     protected Button deleteAccount = UiComponents.createButton("Usuń konto", -700, -350, -200, 200, 25, 20);
     protected Button logOut = UiComponents.createButton("Wyloguj", -550, -350, -200, 200, 25, 20);
     protected Button filter = UiComponents.createButton("Filtruj", 200, -300,-200, 100, 40, 15);
+    protected Button save = UiComponents.createButton("Zapisz prognozę do pliku pdf", -150, -150, -200, 250, 40, 15);
 
     //---------------TextFields-----------------
     protected TextField textRegisterPassRep = UiComponents.createTextField("Enter your password ", -620, -60, -200, 25, 200);
@@ -84,13 +87,12 @@ public class Components {
     ImageView img1 = UiComponents.createImage(-50,-225,-200);
     ImageView img2 = UiComponents.createImage(-50,-200,-200);
     ImageView img3 = UiComponents.createImage(-50,-175,-200);
-
     protected List<Control> registerBlock = new ArrayList<>(Arrays.asList(textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonLogin));
     protected List<Control> loginBlock = new ArrayList<>(Arrays.asList(textLoginEmail,textLoginPass,buttonRegister));
     protected List<Control> onStartBlock = new ArrayList<>(Arrays.asList(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter));
-    protected List<Node> secondBlock = new ArrayList<>(Arrays.asList(label4, textFavoritePlace, buttonEnter2, show,
-            delete1, delete2, delete3, deleteAccount, label5, logOut, comboBox, label6, label7, comboBoxCountries,
-            filter, textMin, textMax, result1, result2, result3, img1, img2, img3, alert1, alert2, alert3, gridPane));
+    protected List<Node> secondBlock = new ArrayList<>(Arrays.asList(label4, textFavoritePlace, buttonEnter2, show, gridPane,
+            gridPane2, deleteAccount, label5, logOut, comboBox, label6, label7, comboBoxCountries,
+            filter, textMin, textMax, result1, result2, result3, img1, img2, img3, alert1, alert2, alert3, save));
     protected AnimationTimer timer;
 
     protected final Sphere earth = new Sphere(150);
@@ -192,27 +194,6 @@ public class Components {
                 throw new RuntimeException(ex);
             }
         });
-        delete1.onActionProperty().set((ActionEvent e) -> {
-            try {
-                delete(0, email);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        delete2.onActionProperty().set((ActionEvent e) -> {
-            try {
-                delete(1, email);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        delete3.onActionProperty().set((ActionEvent e) -> {
-            try {
-                delete(2, email);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
         deleteAccount.onActionProperty().set((ActionEvent e) -> {
             try {
                 boolean confirmed = Potwierdzenie.show("Czy na pewno chcesz usunąć konto?");
@@ -272,6 +253,13 @@ public class Components {
                 throw new RuntimeException(ex);
             }
         });
+        save.onActionProperty().set((ActionEvent e) ->{
+            try {
+                PredictionService.save(getCurrentLocalizationByApi());
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
     }
 
     public void updateLabels(Boolean[] lista){
@@ -298,6 +286,11 @@ public class Components {
         gridPane.setLayoutX(-800);
         gridPane.setLayoutY(-300);
         gridPane.getChildren().clear();
+        gridPane2.setHgap(10);
+        gridPane2.setLayoutX(-800);
+        gridPane2.setLayoutY(-340);
+        gridPane2.getChildren().clear();
+        ArrayList<Button> del = new ArrayList<>();
         for (int i = 0; i < results.size(); i++) {
             String place = results.get(i);
             Button tile = new Button(place);
@@ -307,18 +300,30 @@ public class Components {
             tile.setOnAction(event -> {
                 System.out.println("Selected place: " + place);
             });
+            Button deleteButton = new Button("Usuń");
+            deleteButton.setPrefSize(150, 30);
+            deleteButton.setStyle("-fx-background-color: lightblue; -fx-border-color: red;" +
+                    "-fx-text-fill: white; -fx-border-width: 2;");
+            del.add(deleteButton);
             gridPane.add(tile, i, 0);
+            gridPane2.add(deleteButton, i, 0);
+            deleteButton.setOnAction((ActionEvent e) -> {
+                try {
+                    Button clickedButton = (Button) e.getSource();
+                    delete(del.indexOf(clickedButton), email);
+                    gridPane2.getChildren().remove(clickedButton);
+                    del.remove(clickedButton);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
         }
-        new Thread(() -> {
-            Platform.runLater(() -> universe.getChildren().add(gridPane));
-        }).start();
     }
 
     public void delete(int ind, String mail) throws IOException {
         Node ulub = gridPane.getChildren().get(ind);
         Button tekst = (Button) ulub;
         String text = tekst.getText();
-        System.out.println(text);
         gridPane.getChildren().remove(ulub);
         List<UserScheme> users = db.readUsers();
         UserScheme user = users.stream().filter(u -> u.getEmail().equals(mail)).findAny().orElse(null);

@@ -8,7 +8,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import org.json.JSONObject;
 public class Localization {
-    private final static String apiUrl = "http://ip-api.com/json/";
     private static final String API_URL = "http://ip-api.com/json/";
 
     public static double[] getCurrentLocalizationByApi() {
@@ -30,7 +29,6 @@ public class Localization {
             JSONObject jsonResponse = new JSONObject(response.toString());
             double latitude = jsonResponse.getDouble("lat");
             double longitude = jsonResponse.getDouble("lon");
-            System.out.println(latitude + "" + longitude);
             return new double[]{latitude, longitude};
         } catch (MalformedURLException e) {
             throw new RuntimeException("Invalid URL", e);

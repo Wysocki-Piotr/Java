@@ -24,6 +24,10 @@ public class LoginBlock {
                     components.buttonRegister);
             components.buttonLogin.setVisible(false);
             components.buttonRegister.setVisible(true);
+
+            components.textRegisterEmail.clear();
+            components.textRegisterPass.clear();
+            components.textRegisterPassRep.clear();
         });
         components.buttonEnter.onActionProperty().set((ActionEvent event) -> {
 

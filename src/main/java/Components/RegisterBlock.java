@@ -16,6 +16,9 @@ public class RegisterBlock {
             components.universe.getChildren().addAll(components.textRegisterEmail, components.textRegisterPass, components.textRegisterPassRep, components.buttonLogin);
             components.buttonLogin.setVisible(true);
             components.buttonRegister.setVisible(false);
+
+            components.textLoginPass.clear();
+            components.textLoginEmail.clear();
         });
     }
 }

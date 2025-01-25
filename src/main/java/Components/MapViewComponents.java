@@ -3,7 +3,6 @@ package Components;
 import Alert.Localization;
 import Serwer.WeatherResponse;
 import Serwer.WeatherService;
-import com.almasb.fxgl.localization.LocalizationService;
 import com.sothawo.mapjfx.Configuration;
 import com.sothawo.mapjfx.Coordinate;
 import com.sothawo.mapjfx.MapType;
@@ -15,11 +14,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapViewComponents {
 
@@ -32,11 +32,23 @@ public class MapViewComponents {
     private Button moveBackButton;
     private WeatherService weatherService;
     private Button currentLocationWeatherButton;
+    private Label tempLabel;
+    private Label countryLabel;
+    private Label windLabel;
+    private Label pressureLabel;
+    private Label humidityLabel;
+    private Label tempLabelResp;
+    private Label countryLabelResp;
+    private Label windLabelResp;
+    private Label pressureLabelResp;
+    private Label humidityLabelResp;
+    private Label[] labels;
+
+
 
     public MapViewComponents(Components components) {
         this.components = components;
         initializeMapView(components.primaryStage);
-
         setPanelLayout();
         setButtonsFunctionalities();
     }
@@ -99,29 +111,37 @@ public class MapViewComponents {
 
         //---------------------Weather Data---------------------
 
-        Label weatherLabel = UiComponents.createLabel("Temperatura:", Color.WHITE, 15, 340, -270, 0);
-        stackPane.getChildren().add(weatherLabel);
-        //weatherLabel.setVisible(false);
 
-        Label timeLabel = UiComponents.createLabel("Czas:", Color.WHITE, 15, 313, -240, 0);
-        stackPane.getChildren().add(timeLabel);
-        //timeLabel.setVisible(false);
 
-        Label windLabel = UiComponents.createLabel("Wiatr:", Color.WHITE, 15, 313, -210, 0);
-        stackPane.getChildren().add(windLabel);
-        //windLabel.setVisible(false);
+        tempLabel = UiComponents.createLabel("Temperatura:", Color.WHITE, 15, 340, -270, 0);
+        tempLabelResp = UiComponents.createLabel("", Color.WHITE, 15, 490, -270, 0);
+        tempLabel.setVisible(false);
+        tempLabelResp.setVisible(false);
 
-        Label pressureLabel = UiComponents.createLabel("Ciśnienie:", Color.WHITE, 15, 328, -180, 0);
-        stackPane.getChildren().add(pressureLabel);
-        //pressureLabel.setVisible(false);
+        countryLabel = UiComponents.createLabel("Kraj:", Color.WHITE, 15, 313, -240, 0);
+        countryLabelResp = UiComponents.createLabel("", Color.WHITE, 15, 490, -240, 0);
+        countryLabel.setVisible(false);
+        countryLabelResp.setVisible(false);
 
-        Label humidityLabel = UiComponents.createLabel("Wilgotność:", Color.WHITE, 15, 333, -150, 0);
-        stackPane.getChildren().add(humidityLabel);
-        //humidityLabel.setVisible(false);
+        windLabel = UiComponents.createLabel("Wiatr:", Color.WHITE, 15, 313, -210, 0);
+        windLabelResp = UiComponents.createLabel("", Color.WHITE, 15, 490, -210, 0);
+        windLabel.setVisible(false);
+        windLabelResp.setVisible(false);
+
+        pressureLabel = UiComponents.createLabel("Ciśnienie:", Color.WHITE, 15, 328, -180, 0);
+        pressureLabelResp = UiComponents.createLabel("", Color.WHITE, 15, 490, -180, 0);
+        pressureLabel.setVisible(false);
+        pressureLabelResp.setVisible(false);
+
+        humidityLabel = UiComponents.createLabel("Wilgotność:", Color.WHITE, 15, 333, -150, 0);
+        humidityLabelResp = UiComponents.createLabel("", Color.WHITE, 15, 490, -150, 0);
+        humidityLabel.setVisible(false);
+        humidityLabelResp.setVisible(false);
 
         currentLocationWeatherButton = UiComponents.createButton("Pokaż pogode w swojej lokalizacji", 410, 440, 0, 300, 35, 15);
         stackPane.getChildren().add(currentLocationWeatherButton);
-
+        stackPane.getChildren().addAll(tempLabel, countryLabel, windLabel, pressureLabel, humidityLabel,
+                tempLabelResp,countryLabelResp,windLabelResp,pressureLabelResp,humidityLabelResp);
 
         showButton = new Button("Przenieść do miejsca na mapie");
         showButton.setTranslateY(-300);
@@ -132,12 +152,45 @@ public class MapViewComponents {
 
     }
 
+    private void setWeatherDataOnLabels(WeatherResponse response){
+        tempLabelResp.setText(response.main.temp + "°C");
+        countryLabelResp.setText(CountryMap.getCountryName(response.sys.country));
+        windLabelResp.setText(response.wind.speed + " m/s");
+        pressureLabelResp.setText(response.main.pressure + " hPa");
+        humidityLabelResp.setText(response.main.humidity + "%");
+
+        labels = new Label[]{tempLabel, countryLabel, windLabel, pressureLabel, humidityLabel,
+                tempLabelResp, countryLabelResp, windLabelResp,
+                pressureLabelResp, humidityLabelResp};
+
+        for (Label label : labels) {
+            label.setVisible(true);
+        }
+    }
+
     private void setButtonsFunctionalities(){
 
         showButton.setOnAction(event -> {
             if (CoordinateValidator.userInputValidatorX(xField.getText()) && CoordinateValidator.userInputValidatorY(yField.getText())) {
                 setCoordinates(translateUserCoordinatesToProperTypeX(xField.getText()),
                         translateUserCoordinatesToProperTypeY(yField.getText()));
+
+                try {
+                    WeatherResponse response = getWeatherDataFromAPI(translateUserCoordinatesToProperTypeX(xField.getText()),
+                            translateUserCoordinatesToProperTypeY(yField.getText()));
+
+
+                    setWeatherDataOnLabels(response);
+
+
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+
+
             } else {
                 //TODO: throw exception
             }
@@ -151,6 +204,16 @@ public class MapViewComponents {
         currentLocationWeatherButton.setOnAction(event ->{
             double[] curCoordinates = Localization.getCurrentLocalizationByApi();
             setCoordinates(curCoordinates[0], curCoordinates[1]);
+            try {
+                WeatherResponse response = getWeatherDataFromAPI(curCoordinates[0],curCoordinates[1]);
+                setWeatherDataOnLabels(response);
+                xField.setText(String.valueOf(curCoordinates[0]));
+                yField.setText(String.valueOf(curCoordinates[1]));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+
         });
     }
 
@@ -190,10 +253,10 @@ public class MapViewComponents {
 
     }
 
-    private void getWeatherDataFromAPI(double x,double y) throws IOException {
+    private WeatherResponse getWeatherDataFromAPI(double x,double y) throws IOException {
         HttpURLConnection conn =WeatherService.createByLatLon(x, y);
         WeatherResponse weatherResponse = WeatherService.apiAnswer(conn);
-        System.out.println(weatherResponse.coord.lat);
+        return weatherResponse;
     }
 
     private void setCoordinates(double x, double y) {

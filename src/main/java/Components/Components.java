@@ -14,9 +14,11 @@ import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
+import javafx.scene.text.Font;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -36,7 +38,9 @@ public class Components {
 
     protected GridPane gridPane = new GridPane();
     protected GridPane gridPane2 = new GridPane();
-    private JsonDatabase db;
+
+    private final JsonDatabase db;
+
     protected boolean Logged = false;
 
     protected boolean first = true;
@@ -55,10 +59,10 @@ public class Components {
     protected Label alert2 = UiComponents.createLabel("Brak alertów z wiatrem",Color.WHITE, 20, -700,150, -200);
     protected Label alert3 = UiComponents.createLabel("Brak alertów z opadami",Color.WHITE, 20, -700,200, -200);
     //---------------Buttons-----------------
-    protected Button buttonRegister = UiComponents.createButton("Create Account", -560, 5, -200, 200, 25, 10);
-    protected Button buttonLogin = UiComponents.createButton("Log in", -560, 5, -200, 200, 25, 10);
-    protected Button buttonEnter = UiComponents.createButton("Enter", -600, 30, -200, 200, 25, 20);
-    protected Button buttonEnter2 = UiComponents.createButton("Enter", -620, -30, -200, 200, 25, 20);
+    protected Button buttonRegister = UiComponents.createButton("Create Account", -500, 5, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 10);
+    protected Button buttonLogin = UiComponents.createButton("Log in", -470, 5, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 10);
+    protected Button buttonEnter = UiComponents.createButton("Enter", -550, 30, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 20);
+    protected Button buttonEnter2 = UiComponents.createButton("Enter", -620, -30, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 20);
     protected Button show = UiComponents.createButton("Pokaż ulubione", -720, 0, -200, 200, 25, 20);
     protected Button deleteAccount = UiComponents.createButton("Usuń konto", -700, -350, -200, 200, 25, 20);
     protected Button logOut = UiComponents.createButton("Wyloguj", -550, -350, -200, 200, 25, 20);
@@ -87,12 +91,19 @@ public class Components {
     ImageView img1 = UiComponents.createImage(-50,-225,-200);
     ImageView img2 = UiComponents.createImage(-50,-200,-200);
     ImageView img3 = UiComponents.createImage(-50,-175,-200);
+
+    private Image image = new Image(getClass().getResource("/clippy.jpg").toExternalForm());;
+    private ImageView imageView = new ImageView(image);
+    private Label clippyLabel = new Label("Kliknij na globus!!");
+
     protected List<Control> registerBlock = new ArrayList<>(Arrays.asList(textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonLogin));
     protected List<Control> loginBlock = new ArrayList<>(Arrays.asList(textLoginEmail,textLoginPass,buttonRegister));
     protected List<Control> onStartBlock = new ArrayList<>(Arrays.asList(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter));
-    protected List<Node> secondBlock = new ArrayList<>(Arrays.asList(label4, textFavoritePlace, buttonEnter2, show, gridPane,
-            gridPane2, deleteAccount, label5, logOut, comboBox, label6, label7, comboBoxCountries,
-            filter, textMin, textMax, result1, result2, result3, img1, img2, img3, alert1, alert2, alert3, save));
+
+    protected List<Node> secondBlock = new ArrayList<>(Arrays.asList(label4, textFavoritePlace, buttonEnter2, show,
+            deleteAccount, label5, logOut, comboBox, label6, label7, comboBoxCountries, gridPane2,
+            filter, textMin, textMax, result1, result2, result3, img1, img2, img3, alert1, alert2, alert3, gridPane, imageView, clippyLabel));
+
     protected AnimationTimer timer;
 
     protected final Sphere earth = new Sphere(150);
@@ -101,7 +112,6 @@ public class Components {
 
     public Group world = new Group(earth);
     public Group universe = new Group();
-
 
     private static final float WIDTH = 1400;
     private static final float HEIGHT = 1000;
@@ -121,13 +131,14 @@ public class Components {
 
     public Components(Stage primaryStage){
         this.primaryStage = primaryStage;
+        prepareClippy();
+        System.out.println(secondBlock.get(26).getClass().getSimpleName());
         universe.getChildren().addAll(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter, world);
+
         prepareCamera();
         prepareEarth();
         prepareSceneMain();
         prepareAnimation();
-
-
 
         RegisterBlock registerFunctionality = new RegisterBlock(this);
         registerFunctionality.prepareFunctionalityForRegisterBlock();
@@ -139,6 +150,23 @@ public class Components {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void prepareClippy(){ // nie lepiej do UiComponents?
+
+
+        imageView.setFitHeight(100);
+        imageView.setFitWidth(100);
+        imageView.setTranslateZ(800);
+        imageView.setTranslateX(460);
+        imageView.setTranslateY(460);
+
+
+        clippyLabel.setTextFill(Color.WHITE);
+        clippyLabel.setFont(Font.font("Arial", 20));
+        clippyLabel.setTranslateZ(800);
+        clippyLabel.setTranslateX(460);
+        clippyLabel.setTranslateY(560);
     }
 
     public void prepareEarth() {
@@ -350,25 +378,37 @@ public class Components {
             if (!first)
                 translateTransition.setByX(1000);
             translateTransition.play();
-            translateTransition.setOnFinished(finish -> universe.getChildren().add(control));
+            translateTransition.setOnFinished(finish -> {
+                System.out.println(control.getClass().getSimpleName());
+                universe.getChildren().add(control);
+
+            });
         });
+        PauseTransition pauseForClippy = new PauseTransition(Duration.seconds(1.3));
+        pauseForClippy.setOnFinished(event -> prepareClippy());
+
+
         buttonFunctionalities(email, universe);
 
-        PauseTransition pause = new PauseTransition(Duration.seconds(1.5));
+        PauseTransition pause = new PauseTransition(Duration.seconds(1.3));
         pause.setOnFinished(event -> earth.setOnMouseClicked(click ->{
             if(earth.getUserData() == null){
                 earth.setUserData(true);
                 animateCamera(camera, 1200, 400, false);
+
+
             }
         }));
 
 
         pause.play();
+        pauseForClippy.play();
 
         first = false;
         result1.setVisible(false);
         result1.setVisible(false);
         result1.setVisible(false);
+
     }
     public void transisionReverse(Group universe) {
         Logged = false;

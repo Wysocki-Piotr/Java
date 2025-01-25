@@ -28,7 +28,7 @@ public class LoginBlock {
         components.buttonEnter.onActionProperty().set((ActionEvent event) -> {
 
             if (components.buttonRegister.isVisible()) {
-                //logowanie
+
                 String email = components.textLoginEmail.getText();
                 String password = components.textLoginPass.getText();
 
@@ -95,10 +95,15 @@ public class LoginBlock {
                     System.out.println("registration successful");
                     components.universe.getChildren().removeAll(components.textRegisterEmail, components.textRegisterPass,
                             components.textRegisterPassRep, components.buttonLogin);
+
                     components.universe.getChildren().addAll(components.textLoginEmail, components.textLoginPass,
                             components.buttonRegister);
+
+                    components.transision(components.universe, email, components.camera, components.primaryStage);
+
                     components.buttonLogin.setVisible(false);
                     components.buttonRegister.setVisible(true);
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

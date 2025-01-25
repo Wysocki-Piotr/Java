@@ -2,11 +2,9 @@ package org.example.demo;
 
 import Components.Components;
 import javafx.application.Application;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import java.io.IOException;
 import Alert.AlertManagement;
-import javafx.stage.StageStyle;
 
 
 public class Main extends Application {

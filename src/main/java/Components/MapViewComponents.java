@@ -47,7 +47,7 @@ public class MapViewComponents {
         mapView.setMapType(MapType.OSM);
         double[] curCoordinates = Localization.getCurrentLocalizationByApi();
         mapView.setCenter(new Coordinate(curCoordinates[0], curCoordinates[1]));
-        mapView.setZoom(14);
+        mapView.setZoom(11);
         mapView.initialize(Configuration.builder()
                 .showZoomControls(true)
                 .build());

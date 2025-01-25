@@ -409,7 +409,10 @@ public class Components {
         Logged = false;
         secondBlock.forEach(control -> {
             TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
-            translateTransition.setByX(-1000);
+            if(control.equals(imageView) || control.equals(clippyLabel))
+                translateTransition.setByX(1000);
+            else
+                translateTransition.setByX(-1000);
             translateTransition.play();
             translateTransition.setOnFinished(finish -> universe.getChildren().remove(control));
         });

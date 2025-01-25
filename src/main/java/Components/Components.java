@@ -33,7 +33,7 @@ import static Serwer.WeatherService.filterWeather;
 public class Components {
 
     protected GridPane gridPane = new GridPane();
-    private JsonDatabase db;
+    private final JsonDatabase db;
     protected boolean Logged = false;
 
     protected boolean first = true;
@@ -86,15 +86,18 @@ public class Components {
     ImageView img1 = UiComponents.createImage(-50,-225,-200);
     ImageView img2 = UiComponents.createImage(-50,-200,-200);
     ImageView img3 = UiComponents.createImage(-50,-175,-200);
-    private Image image;
-    private ImageView imageView;
+    private Image image = new Image(getClass().getResource("/clippy.jpg").toExternalForm());;
+    private ImageView imageView = new ImageView(image);
+    private Label clippyLabel = new Label("Kliknij na globus!!");
 
     protected List<Control> registerBlock = new ArrayList<>(Arrays.asList(textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonLogin));
     protected List<Control> loginBlock = new ArrayList<>(Arrays.asList(textLoginEmail,textLoginPass,buttonRegister));
     protected List<Control> onStartBlock = new ArrayList<>(Arrays.asList(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter));
+
     protected List<Node> secondBlock = new ArrayList<>(Arrays.asList(label4, textFavoritePlace, buttonEnter2, show,
             delete1, delete2, delete3, deleteAccount, label5, logOut, comboBox, label6, label7, comboBoxCountries,
-            filter, textMin, textMax, result1, result2, result3, img1, img2, img3, alert1, alert2, alert3, gridPane));
+            filter, textMin, textMax, result1, result2, result3, img1, img2, img3, alert1, alert2, alert3, gridPane, imageView, clippyLabel));
+
     protected AnimationTimer timer;
 
     protected final Sphere earth = new Sphere(150);
@@ -122,7 +125,10 @@ public class Components {
 
     public Components(Stage primaryStage){
         this.primaryStage = primaryStage;
+        prepareClippy();
+        System.out.println(secondBlock.get(26).getClass().getSimpleName());
         universe.getChildren().addAll(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter, world);
+
         prepareCamera();
         prepareEarth();
         prepareSceneMain();
@@ -144,22 +150,20 @@ public class Components {
 
     public void prepareClippy(){
 
-        image = new Image(getClass().getResource("/clippy.jpg").toExternalForm());
-        imageView = new ImageView(image);
+
         imageView.setFitHeight(100);
         imageView.setFitWidth(100);
         imageView.setTranslateZ(800);
         imageView.setTranslateX(460);
         imageView.setTranslateY(460);
-        universe.getChildren().add(imageView);
 
-        Label clippyLabel = new Label("Kliknij na globus!!");
+
         clippyLabel.setTextFill(Color.WHITE);
         clippyLabel.setFont(Font.font("Arial", 20));
         clippyLabel.setTranslateZ(800);
         clippyLabel.setTranslateX(460);
         clippyLabel.setTranslateY(560);
-        universe.getChildren().add(clippyLabel);
+
 
     }
 
@@ -370,7 +374,7 @@ public class Components {
                 translateTransition.setByX(1000);
             translateTransition.play();
             translateTransition.setOnFinished(finish -> {
-
+                System.out.println(control.getClass().getSimpleName());
                 universe.getChildren().add(control);
 
             });

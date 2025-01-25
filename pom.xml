@@ -23,6 +23,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.twelvemonkeys.imageio</groupId>
+            <artifactId>imageio-webp</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.sothawo</groupId>
             <artifactId>mapjfx</artifactId>
             <version>3.1.0</version>

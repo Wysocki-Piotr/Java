@@ -18,7 +18,6 @@ public class UiComponents {
         textLogin.setPrefWidth(width);
         textLogin.setFocusTraversable(false);
         return textLogin;
-
     }
 
     public static Button createButton(String text,int X,int Y,int Z,int sizeX,int sizeY,int fontSize){

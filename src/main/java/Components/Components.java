@@ -16,6 +16,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
+import javafx.scene.text.Font;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -85,6 +86,8 @@ public class Components {
     ImageView img1 = UiComponents.createImage(-50,-225,-200);
     ImageView img2 = UiComponents.createImage(-50,-200,-200);
     ImageView img3 = UiComponents.createImage(-50,-175,-200);
+    private Image image;
+    private ImageView imageView;
 
     protected List<Control> registerBlock = new ArrayList<>(Arrays.asList(textRegisterEmail,textRegisterPass,textRegisterPassRep,buttonLogin));
     protected List<Control> loginBlock = new ArrayList<>(Arrays.asList(textLoginEmail,textLoginPass,buttonRegister));
@@ -100,7 +103,6 @@ public class Components {
 
     public Group world = new Group(earth);
     public Group universe = new Group();
-
 
     private static final float WIDTH = 1400;
     private static final float HEIGHT = 1000;
@@ -138,6 +140,27 @@ public class Components {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void prepareClippy(){
+
+        image = new Image(getClass().getResource("/clippy.jpg").toExternalForm());
+        imageView = new ImageView(image);
+        imageView.setFitHeight(100);
+        imageView.setFitWidth(100);
+        imageView.setTranslateZ(800);
+        imageView.setTranslateX(460);
+        imageView.setTranslateY(460);
+        universe.getChildren().add(imageView);
+
+        Label clippyLabel = new Label("Kliknij na globus!!");
+        clippyLabel.setTextFill(Color.WHITE);
+        clippyLabel.setFont(Font.font("Arial", 20));
+        clippyLabel.setTranslateZ(800);
+        clippyLabel.setTranslateX(460);
+        clippyLabel.setTranslateY(560);
+        universe.getChildren().add(clippyLabel);
+
     }
 
     public void prepareEarth() {
@@ -346,25 +369,37 @@ public class Components {
             if (!first)
                 translateTransition.setByX(1000);
             translateTransition.play();
-            translateTransition.setOnFinished(finish -> universe.getChildren().add(control));
+            translateTransition.setOnFinished(finish -> {
+
+                universe.getChildren().add(control);
+
+            });
         });
+        PauseTransition pauseForClippy = new PauseTransition(Duration.seconds(1.3));
+        pauseForClippy.setOnFinished(event -> prepareClippy());
+
+
         buttonFunctionalities(email, universe);
 
-        PauseTransition pause = new PauseTransition(Duration.seconds(1.5));
+        PauseTransition pause = new PauseTransition(Duration.seconds(1.3));
         pause.setOnFinished(event -> earth.setOnMouseClicked(click ->{
             if(earth.getUserData() == null){
                 earth.setUserData(true);
                 animateCamera(camera, 1200, 400, false);
+
+
             }
         }));
 
 
         pause.play();
+        pauseForClippy.play();
 
         first = false;
         result1.setVisible(false);
         result1.setVisible(false);
         result1.setVisible(false);
+
     }
     public void transisionReverse(Group universe) {
         Logged = false;

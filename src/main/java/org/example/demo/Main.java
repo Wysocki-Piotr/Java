@@ -2,9 +2,11 @@ package org.example.demo;
 
 import Components.Components;
 import javafx.application.Application;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import java.io.IOException;
 import Alert.AlertManagement;
+import javafx.stage.StageStyle;
 
 
 public class Main extends Application {
@@ -17,8 +19,10 @@ public class Main extends Application {
         Components components = new Components(primaryStage);
         primaryStage.centerOnScreen();
         primaryStage.setTitle("Global Weather App");
+
         primaryStage.setResizable(false);
         primaryStage.setScene(components.sceneMain);
+
         primaryStage.show();
         primaryStage.setOnCloseRequest(event -> {
             System.exit(0);

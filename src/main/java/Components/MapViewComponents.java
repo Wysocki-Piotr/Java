@@ -45,7 +45,8 @@ public class MapViewComponents {
     public void initializeMapView(Stage primaryStage) {
         mapView = new MapView();
         mapView.setMapType(MapType.OSM);
-        mapView.setCenter(new Coordinate(52.2312, 20.9897));
+        double[] curCoordinates = Localization.getCurrentLocalizationByApi();
+        mapView.setCenter(new Coordinate(curCoordinates[0], curCoordinates[1]));
         mapView.setZoom(14);
         mapView.initialize(Configuration.builder()
                 .showZoomControls(true)
@@ -151,33 +152,8 @@ public class MapViewComponents {
             double[] curCoordinates = Localization.getCurrentLocalizationByApi();
             setCoordinates(curCoordinates[0], curCoordinates[1]);
         });
-
-        stackPane.setOnMouseClicked(event -> {
-            //System.out.println(event.getTarget().getClass());
-            if(event.getTarget() instanceof WebView){
-                double xCoordinate = event.getScreenX();
-                double yCoordinate = event.getScreenY();
-
-                Coordinate coordinate = screenToMapCoordinate(xCoordinate, yCoordinate);
-                if (coordinate != null) {
-                    System.out.println("Coordinates: " + coordinate.getLatitude() + ", " + coordinate.getLongitude());
-                } else {
-                    System.out.println("Could not get coordinates");
-                }
-
-            }else{
-                System.out.println("nie plansza");
-            }
-        });
     }
-    private Coordinate screenToMapCoordinate(double x, double y) {
 
-        double mapX = (x - mapView.getLayoutX()) / mapView.getWidth();
-        double mapY = (y - mapView.getLayoutY()) / mapView.getHeight();
-        double longitude = mapView.getCenter().getLongitude() + (mapX - 0.5) * 360 / Math.pow(2, mapView.getZoom());
-        double latitude = mapView.getCenter().getLatitude() - (mapY - 0.5) * 180 / Math.pow(2, mapView.getZoom());
-        return new Coordinate(latitude, longitude);
-    }
 
     private static class CoordinateValidator {
 

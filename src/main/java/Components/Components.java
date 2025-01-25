@@ -350,7 +350,14 @@ public class Components {
         buttonFunctionalities(email, universe);
 
         PauseTransition pause = new PauseTransition(Duration.seconds(1.5));
-        pause.setOnFinished(event -> earth.setOnMouseClicked(click -> animateCamera(camera, 1200, 400, false)));
+        pause.setOnFinished(event -> earth.setOnMouseClicked(click ->{
+            if(earth.getUserData() == null){
+                earth.setUserData(true);
+                animateCamera(camera, 1200, 400, false);
+            }
+        }));
+
+
         pause.play();
 
         first = false;
@@ -426,6 +433,7 @@ public class Components {
             timeline.setOnFinished(event -> {
 
                 MapViewComponents mapViewComponents = new MapViewComponents(this);
+                earth.setUserData(null);
             });
             timeline.play();
         }

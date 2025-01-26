@@ -1,5 +1,6 @@
 package Serwer;
 
+import Exceptions.ApiKeyError;
 import Exceptions.FileWithCountriesError;
 import Exceptions.PageNotFoundException;
 import com.google.gson.Gson;
@@ -14,13 +15,10 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.text.PDFTextStripper;
 
 public class PredictionService {
     private final static String apiKey;
@@ -30,8 +28,11 @@ public class PredictionService {
         try {
             apiKey = Config.getApiKey();
         } catch (IOException e) {
-            System.out.println("Problemy z kluczem API");
-            throw new RuntimeException();
+            try {
+                throw new ApiKeyError("Problemy z kluczem API!");
+            } catch (ApiKeyError ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
     public static WeatherForecast.Forecast checkForecast(double lat, double lon, long currentTime) {
@@ -43,7 +44,7 @@ public class PredictionService {
                 return forecast;
             }
         }
-        return null; // niemozliwe dla tego api
+        return null;
     }
     public static WeatherForecast readByLatlon(double lat, double lon) {
         String urlString = "https://api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&appid=" +apiKey +"&units=metric";

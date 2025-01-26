@@ -112,15 +112,33 @@ public class WeatherService {
         return conn;
     }
 
-    public static WeatherResponse apiAnswer(HttpURLConnection conn) throws IOException {
-        conn.setRequestMethod("GET");
-        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+    public static WeatherResponse apiAnswer(HttpURLConnection conn) throws PageNotFoundException, FileWithCountriesError {
+        try {
+            conn.setRequestMethod("GET");
+        } catch (ProtocolException e) {
+            throw new PageNotFoundException("Zle żądanie Api");
+        }
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         StringBuilder response = new StringBuilder();
         String inputLine;
-        while ((inputLine = in.readLine()) != null) {
+        while (true) {
+            try {
+                if (!((inputLine = in.readLine()) != null)) break;
+            } catch (IOException e) {
+                throw new FileWithCountriesError("Problemy z wczytywaniem do pliku!");
+            }
             response.append(inputLine);
         }
-        in.close();
+        try {
+            in.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         Gson gson = new Gson();
         WeatherResponse outcome = gson.fromJson(String.valueOf(response), WeatherResponse.class);
         return outcome;
@@ -156,18 +174,10 @@ public class WeatherService {
             } catch (IOException e) {
                 throw new RuntimeException();
             }
-            try {
-                WeatherResponse outcome = apiAnswer(conn);
-                if (outcome.weather[0].main.equals(comb) && min <= outcome.main.temp && outcome.main.temp <= max) {
-                    String url = "https://openweathermap.org/img/wn/" + outcome.weather[0].icon + "@2x.png";
-                    filtered.put(city, url);
-                }
-            } catch (IOException ex){
-                try {
-                    throw new Credentials("Problemy z dostepem do kraju");
-                } catch (Credentials e) {
-                    throw new RuntimeException(e);
-                }
+            WeatherResponse outcome = apiAnswer(conn);
+            if (outcome.weather[0].main.equals(comb) && min <= outcome.main.temp && outcome.main.temp <= max) {
+                String url = "https://openweathermap.org/img/wn/" + outcome.weather[0].icon + "@2x.png";
+                filtered.put(city, url);
             }
         }
         Map<String, String> limitedMap = filtered.entrySet()

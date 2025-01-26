@@ -1,6 +1,8 @@
 package Components;
 
 import Alert.Localization;
+import Exceptions.FileWithCountriesError;
+import Exceptions.PageNotFoundException;
 import Serwer.WeatherResponse;
 import Serwer.WeatherService;
 import com.sothawo.mapjfx.Configuration;
@@ -208,7 +210,7 @@ public class MapViewComponents {
 
 
 
-                } catch (IOException e) {
+                } catch (IOException | PageNotFoundException | FileWithCountriesError e) {
                     throw new RuntimeException(e);
                 }
 
@@ -234,7 +236,7 @@ public class MapViewComponents {
 
                 inputLongtitude.setText(String.valueOf(curCoordinates[0]));
                 inputLatitude.setText(String.valueOf(curCoordinates[1]));
-            } catch (IOException e) {
+            } catch (IOException | PageNotFoundException | FileWithCountriesError e) {
                 throw new RuntimeException(e);
             }
 
@@ -279,7 +281,7 @@ public class MapViewComponents {
 
     }
 
-    private WeatherResponse getWeatherDataFromAPI(String latitude,String longtitude) throws IOException {
+    private WeatherResponse getWeatherDataFromAPI(String latitude,String longtitude) throws IOException, PageNotFoundException, FileWithCountriesError {
         double latitudeValue = Double.parseDouble(latitude);
         double longtitudeValue = Double.parseDouble(longtitude);
         HttpURLConnection conn =WeatherService.createByLatLon(latitudeValue, longtitudeValue);

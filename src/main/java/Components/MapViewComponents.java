@@ -18,8 +18,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MapViewComponents {
 
@@ -43,6 +41,7 @@ public class MapViewComponents {
     private Label pressureLabelResp;
     private Label humidityLabelResp;
     private Label[] labels;
+    private Button pointFromUserButton;
 
 
 
@@ -82,19 +81,32 @@ public class MapViewComponents {
     }
 
     private void setPanelLayout() {
-        Label enterLabel = UiComponents.createLabel("Podaj koordynaty", Color.WHITE, 30, 470, -420, 0);
-        stackPane.getChildren().add(enterLabel);
 
+        //---------------------Buttons---------------------
         moveBackButton = UiComponents.createButton("Wróć", 610, 440, 0, 70, 35, 15);
         stackPane.getChildren().add(moveBackButton);
+        currentLocationWeatherButton = UiComponents.createButton("Pokaż pogode w swojej lokalizacji", 410, 440, 0, 300, 35, 15);
 
+        showButton = new Button("Przenieść do miejsca na mapie");
+        showButton.setTranslateY(-300);
+        showButton.setTranslateX(470);
+
+        pointFromUserButton = UiComponents.createButton("Pokaż pogodę w tym miejscu",470,300,0,300,35,15);
+        pointFromUserButton.setTranslateY(300);
+        pointFromUserButton.setTranslateX(470);
+
+
+        //---------------------Labels---------------------
+
+        Label enterLabel = UiComponents.createLabel("Podaj koordynaty", Color.WHITE, 30, 470, -420, 0);
+        stackPane.getChildren().add(enterLabel);
         Label xLabel = UiComponents.createLabel("X:", Color.WHITE, 22, 320, -370, 0);
         Label yLabel = UiComponents.createLabel("Y:", Color.WHITE, 22, 320, -340, 0);
 
 
         stackPane.getChildren().add(xLabel);
         stackPane.getChildren().add(yLabel);
-
+        //---------------TextFields---------------------
         xField = new TextField();
         xField.setPromptText("Wpisz współrzędne X");
         xField.setMaxWidth(200);
@@ -110,8 +122,6 @@ public class MapViewComponents {
         stackPane.getChildren().add(yField);
 
         //---------------------Weather Data---------------------
-
-
 
         tempLabel = UiComponents.createLabel("Temperatura:", Color.WHITE, 15, 340, -270, 0);
         tempLabelResp = UiComponents.createLabel("", Color.WHITE, 15, 490, -270, 0);
@@ -138,14 +148,15 @@ public class MapViewComponents {
         humidityLabel.setVisible(false);
         humidityLabelResp.setVisible(false);
 
-        currentLocationWeatherButton = UiComponents.createButton("Pokaż pogode w swojej lokalizacji", 410, 440, 0, 300, 35, 15);
+
         stackPane.getChildren().add(currentLocationWeatherButton);
         stackPane.getChildren().addAll(tempLabel, countryLabel, windLabel, pressureLabel, humidityLabel,
-                tempLabelResp,countryLabelResp,windLabelResp,pressureLabelResp,humidityLabelResp);
+                tempLabelResp,countryLabelResp,windLabelResp,pressureLabelResp,humidityLabelResp,pointFromUserButton);
 
-        showButton = new Button("Przenieść do miejsca na mapie");
-        showButton.setTranslateY(-300);
-        showButton.setTranslateX(470);
+
+
+
+
 
         stackPane.getChildren().add(showButton);
 
@@ -168,13 +179,22 @@ public class MapViewComponents {
         }
     }
 
+    private double[] apiCoordinates2MapCoorddinates(double x, double y){
+        double[] mapCoordinates = new double[2];
+        mapCoordinates[0] = x;
+        mapCoordinates[1] = y;
+        return mapCoordinates;
+    }
+
     private void setButtonsFunctionalities(){
 
         showButton.setOnAction(event -> {
+            System.out.println(xField.getText());
+            System.out.println(yField.getText());
             if (CoordinateValidator.userInputValidatorX(xField.getText()) && CoordinateValidator.userInputValidatorY(yField.getText())) {
                 setCoordinates(translateUserCoordinatesToProperTypeX(xField.getText()),
                         translateUserCoordinatesToProperTypeY(yField.getText()));
-
+                //TODO wspolrzedne po nacisnieciu przycisku "Pokaz pogode ..." musza byc w odpowiednim formacie
                 try {
                     WeatherResponse response = getWeatherDataFromAPI(translateUserCoordinatesToProperTypeX(xField.getText()),
                             translateUserCoordinatesToProperTypeY(yField.getText()));
@@ -207,8 +227,8 @@ public class MapViewComponents {
             try {
                 WeatherResponse response = getWeatherDataFromAPI(curCoordinates[0],curCoordinates[1]);
                 setWeatherDataOnLabels(response);
-                xField.setText(String.valueOf(curCoordinates[0]));
-                yField.setText(String.valueOf(curCoordinates[1]));
+                xField.setText(String.valueOf(curCoordinates[0])+ "E");
+                yField.setText(String.valueOf(curCoordinates[1])+"N");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -216,6 +236,8 @@ public class MapViewComponents {
 
         });
     }
+
+
 
 
     private static class CoordinateValidator {

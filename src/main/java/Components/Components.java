@@ -2,6 +2,10 @@ package Components;
 
 import DB.JsonDatabase;
 import DB.UserScheme;
+import Exceptions.Credentials;
+import Exceptions.DBError;
+import Exceptions.FileWithCountriesError;
+import Exceptions.PageNotFoundException;
 import Serwer.PredictionService;
 import Serwer.WeatherForecast;
 import Serwer.WeatherService;
@@ -210,17 +214,21 @@ public class Components {
         buttonEnter2.onActionProperty().set((ActionEvent e) -> {
             try {
                 favorite(textFavoritePlace.getText(), email, universe);
-            } catch (IOException ex) {
+            } catch (PageNotFoundException ex) {
+                throw new RuntimeException(ex);
+            } catch (DBError ex) {
                 throw new RuntimeException(ex);
             }
         });
         show.onActionProperty().set((ActionEvent e) -> {
             try {
                 favorite("a", email, universe);
-                show.setVisible(false);
-            } catch (IOException ex) {
+            } catch (PageNotFoundException ex) {
+                throw new RuntimeException(ex);
+            } catch (DBError ex) {
                 throw new RuntimeException(ex);
             }
+            show.setVisible(false);
         });
         deleteAccount.onActionProperty().set((ActionEvent e) -> {
             try {
@@ -254,32 +262,37 @@ public class Components {
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
+            Map mapa = null;
             try {
-                Map mapa = filterWeather((String) comboBox.getValue(),(String) comboBoxCountries.getValue(), wartosc1, wartosc2);
-                result1.setVisible(true);
-                result2.setVisible(true);
-                result3.setVisible(true);
-                img1.setVisible(false);
-                img2.setVisible(false);
-                img3.setVisible(false);
-                String r1 = (String) mapa.keySet().stream().skip(0).findFirst().orElse("");
-                String r2 = (String) mapa.keySet().stream().skip(1).findFirst().orElse("");
-                String r3 = (String) mapa.keySet().stream().skip(2).findFirst().orElse("");
-                result1.setText(r1);
-                result2.setText(r2);
-                result3.setText(r3);
-                img1.setImage(new Image((String) mapa.values().stream().findFirst().orElse("https://via.placeholder.com/1x1/000000")));
-                img2.setImage(new Image((String) mapa.values().stream().skip(1).findFirst().orElse("https://via.placeholder.com/1x1/000000")));
-                img3.setImage(new Image((String) mapa.values().stream().skip(2).findFirst().orElse("https://via.placeholder.com/1x1/000000")));
-                place(img1, -250, -225, -200);
-                place(img2, -250, -200, -200);
-                place(img3, -250, -175, -200);
-                img1.setVisible(true);
-                img2.setVisible(true);
-                img3.setVisible(true);
-            } catch (IOException ex) {
+                mapa = filterWeather((String) comboBox.getValue(),(String) comboBoxCountries.getValue(), wartosc1, wartosc2);
+            } catch (FileWithCountriesError ex) {
+                throw new RuntimeException(ex);
+            } catch (Credentials ex) {
+                throw new RuntimeException(ex);
+            } catch (PageNotFoundException ex) {
                 throw new RuntimeException(ex);
             }
+            result1.setVisible(true);
+            result2.setVisible(true);
+            result3.setVisible(true);
+            img1.setVisible(false);
+            img2.setVisible(false);
+            img3.setVisible(false);
+            String r1 = (String) mapa.keySet().stream().skip(0).findFirst().orElse("");
+            String r2 = (String) mapa.keySet().stream().skip(1).findFirst().orElse("");
+            String r3 = (String) mapa.keySet().stream().skip(2).findFirst().orElse("");
+            result1.setText(r1);
+            result2.setText(r2);
+            result3.setText(r3);
+            img1.setImage(new Image((String) mapa.values().stream().findFirst().orElse("https://via.placeholder.com/1x1/000000")));
+            img2.setImage(new Image((String) mapa.values().stream().skip(1).findFirst().orElse("https://via.placeholder.com/1x1/000000")));
+            img3.setImage(new Image((String) mapa.values().stream().skip(2).findFirst().orElse("https://via.placeholder.com/1x1/000000")));
+            place(img1, -250, -225, -200);
+            place(img2, -250, -200, -200);
+            place(img3, -250, -175, -200);
+            img1.setVisible(true);
+            img2.setVisible(true);
+            img3.setVisible(true);
         });
         save.onActionProperty().set((ActionEvent e) ->{
             try {
@@ -305,7 +318,7 @@ public class Components {
             alert3.setText("Jutro silne opady deszczu!");
     }
 
-    private void favorite(String text, String email, Group universe) throws IOException {
+    private void favorite(String text, String email, Group universe) throws PageNotFoundException, DBError {
         if (text.isEmpty())
             return;
         List<String> results = WeatherService.exist(text, email);
@@ -341,24 +354,33 @@ public class Components {
                     delete(del.indexOf(clickedButton), email);
                     gridPane2.getChildren().remove(clickedButton);
                     del.remove(clickedButton);
-                } catch (IOException ex) {
+                } catch (DBError ex) {
                     throw new RuntimeException(ex);
                 }
             });
         }
     }
 
-    public void delete(int ind, String mail) throws IOException {
+    public void delete(int ind, String mail) throws DBError {
         Node ulub = gridPane.getChildren().get(ind);
         Button tekst = (Button) ulub;
         String text = tekst.getText();
         gridPane.getChildren().remove(ulub);
-        List<UserScheme> users = db.readUsers();
+        List<UserScheme> users = null;
+        try {
+            users = db.readUsers();
+        } catch (IOException e) {
+            throw new DBError("Problem z wczytywaniem użytkowników!");
+        }
         UserScheme user = users.stream().filter(u -> u.getEmail().equals(mail)).findAny().orElse(null);
         users.remove(user);
         user.getFavPlaces().remove(text);
         users.add(user);
-        db.writeUsers(users);
+        try {
+            db.writeUsers(users);
+        } catch (IOException e) {
+            throw new DBError("Problem z zapisywaniem użytkowników!");
+        }
     }
 
     public void transision(Group universe, String email, Camera camera, Stage primaryStage) {

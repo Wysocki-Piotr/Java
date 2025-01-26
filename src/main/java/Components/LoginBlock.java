@@ -2,6 +2,7 @@ package Components;
 
 import DB.JsonDatabase;
 import DB.UserScheme;
+import Exceptions.DBError;
 import javafx.event.ActionEvent;
 
 import java.io.IOException;
@@ -15,6 +16,15 @@ public class LoginBlock {
     public LoginBlock(Components components) {
         this.components = components;
     }
+    public void clearRegister (){
+        components.textRegisterEmail.clear();
+        components.textRegisterPass.clear();
+        components.textRegisterPassRep.clear();
+    }
+    public void clearEmail(){
+        components.textLoginEmail.clear();
+        components.textLoginPass.clear();
+    }
 
     public void prepareFunctionalityForLoginBlock(){
         components.buttonLogin.onActionProperty().set((ActionEvent event) -> {
@@ -25,9 +35,7 @@ public class LoginBlock {
             components.buttonLogin.setVisible(false);
             components.buttonRegister.setVisible(true);
 
-            components.textRegisterEmail.clear();
-            components.textRegisterPass.clear();
-            components.textRegisterPassRep.clear();
+            clearRegister();
         });
         components.buttonEnter.onActionProperty().set((ActionEvent event) -> {
 
@@ -38,8 +46,7 @@ public class LoginBlock {
 
                 if (email.isEmpty() || password.isEmpty()) {
                     System.out.println("Fill all fields");
-                    components.textLoginEmail.clear();
-                    components.textLoginPass.clear();
+                    clearEmail();
                     return;
                 }
 
@@ -60,8 +67,7 @@ public class LoginBlock {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                components.textLoginEmail.clear();
-                components.textLoginPass.clear();
+                clearEmail();
 
             } else {
                 //rejestracja
@@ -71,23 +77,27 @@ public class LoginBlock {
 
                 if (email.isEmpty() || password.isEmpty() || passwordRep.isEmpty()) {
                     System.out.println("Fill all fields");
-                    components.textRegisterEmail.clear();
-                    components.textRegisterPass.clear();
-                    components.textRegisterPassRep.clear();
+                    clearRegister();
                     return;
                 }
 
                 if (!password.equals(passwordRep)) {
                     System.out.println("Passwords do not match.");
-                    components.textRegisterEmail.clear();
-                    components.textRegisterPass.clear();
-                    components.textRegisterPassRep.clear();
+                    clearRegister();
                     return;
                 }
 
                 try {
                     JsonDatabase db = components.getDb();
                     List<UserScheme> users = db.readUsers();
+
+                    for (UserScheme user : users) {
+                        if (user.getEmail().equals(email)) {
+                            System.out.println("Email already exists in the database.");
+                            clearRegister();
+                            return;
+                        }
+                    }
 
                     UserScheme newUser = new UserScheme();
                     newUser.setEmail(email);
@@ -109,11 +119,12 @@ public class LoginBlock {
                     components.buttonRegister.setVisible(true);
 
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    try {
+                        throw new DBError("Problem z pobraniem bazy danych");
+                    } catch (DBError ex) {
+                        System.out.println(ex.getMessage());
+                    }
                 }
-                components.textRegisterEmail.clear();
-                components.textRegisterPass.clear();
-                components.textRegisterPassRep.clear();
 
             }
         });

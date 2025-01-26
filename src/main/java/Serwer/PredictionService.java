@@ -1,11 +1,15 @@
 package Serwer;
 
+import Exceptions.FileWithCountriesError;
+import Exceptions.PageNotFoundException;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -32,11 +36,7 @@ public class PredictionService {
     }
     public static WeatherForecast.Forecast checkForecast(double lat, double lon, long currentTime) {
         WeatherForecast weather = null;
-        try {
-            weather = readByLatlon(lat, lon);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        weather = readByLatlon(lat, lon);
         long tomorrowStartTime = currentTime + oneDayInSeconds;
         for (WeatherForecast.Forecast forecast : weather.list) {
             if (forecast.dt >= tomorrowStartTime && forecast.dt < tomorrowStartTime + oneDayInSeconds) {
@@ -45,19 +45,59 @@ public class PredictionService {
         }
         return null; // niemozliwe dla tego api
     }
-    public static WeatherForecast readByLatlon(double lat, double lon) throws IOException {
+    public static WeatherForecast readByLatlon(double lat, double lon) {
         String urlString = "https://api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&appid=" +apiKey +"&units=metric";
-        URL url = new URL(urlString);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
+        URL url = null;
+        try {
+            url = new URL(urlString);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) url.openConnection();
+        } catch (IOException e) {
+            try {
+                throw new PageNotFoundException("Problemy z łączeniem!");
+            } catch (PageNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        try {
+            conn.setRequestMethod("GET");
+        } catch (ProtocolException e) {
+            throw new RuntimeException(e);
+        }
         // int responseCode = conn.getResponseCode();
-        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         StringBuilder response = new StringBuilder();
         String inputLine;
-        while ((inputLine = in.readLine()) != null) {
+        while (true) {
+            try {
+                if (!((inputLine = in.readLine()) != null)) break;
+            } catch (IOException e) {
+                try {
+                    throw new FileWithCountriesError("Problemy z wczytywaniem z pliku!");
+                } catch (FileWithCountriesError ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
             response.append(inputLine);
         }
-        in.close();
+        try {
+            in.close();
+        } catch (IOException e) {
+            try {
+                throw new FileWithCountriesError("Problem z zamykaniem pliku!");
+            } catch (FileWithCountriesError ex) {
+                throw new RuntimeException(ex);
+            }
+        }
         Gson gson = new Gson();
         WeatherForecast outcome = gson.fromJson(String.valueOf(response), WeatherForecast.class);
         return outcome;
@@ -77,7 +117,7 @@ public class PredictionService {
         if (forecast.rain != null && forecast.rain._3h > 20) return true;
         return false;
     }
-    public static void save(double[] coord) throws IOException {
+    public static void save(double[] coord) throws IOException{
 
         WeatherForecast toSave = readByLatlon(coord[0], coord[1]);
 

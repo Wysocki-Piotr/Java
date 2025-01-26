@@ -101,7 +101,7 @@ public class Components {
     protected List<Control> onStartBlock = new ArrayList<>(Arrays.asList(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter));
 
     protected List<Node> secondBlock = new ArrayList<>(Arrays.asList(label4, textFavoritePlace, buttonEnter2, show,
-            deleteAccount, label5, logOut, comboBox, label6, label7, comboBoxCountries, gridPane2,
+            deleteAccount, label5, logOut, comboBox, label6, label7, comboBoxCountries, gridPane2, save,
             filter, textMin, textMax, result1, result2, result3, img1, img2, img3, alert1, alert2, alert3, gridPane, imageView, clippyLabel));
 
     protected AnimationTimer timer;

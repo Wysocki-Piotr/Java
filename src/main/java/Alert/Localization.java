@@ -29,7 +29,7 @@ public class Localization {
             JSONObject jsonResponse = new JSONObject(response.toString());
             double latitude = jsonResponse.getDouble("lat");
             double longitude = jsonResponse.getDouble("lon");
-            return new double[]{latitude, longitude};
+            return new double[]{latitude,longitude,};
         } catch (MalformedURLException e) {
             throw new RuntimeException("Invalid URL", e);
         } catch (IOException e) {

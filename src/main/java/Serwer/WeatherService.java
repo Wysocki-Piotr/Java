@@ -113,11 +113,6 @@ public class WeatherService {
     }
 
     public static WeatherResponse apiAnswer(HttpURLConnection conn) throws PageNotFoundException, FileWithCountriesError {
-        try {
-            conn.setRequestMethod("GET");
-        } catch (ProtocolException e) {
-            throw new PageNotFoundException("Zle żądanie Api");
-        }
         BufferedReader in = null;
         try {
             in = new BufferedReader(new InputStreamReader(conn.getInputStream()));

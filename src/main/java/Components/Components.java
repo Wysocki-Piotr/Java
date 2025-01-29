@@ -62,6 +62,7 @@ public class Components {
     protected Label alert1 = UiComponents.createLabel("Brak alertów z temperaturą",Color.WHITE, 20, -700,100, -200);
     protected Label alert2 = UiComponents.createLabel("Brak alertów z wiatrem",Color.WHITE, 20, -700,150, -200);
     protected Label alert3 = UiComponents.createLabel("Brak alertów z opadami",Color.WHITE, 20, -700,200, -200);
+    protected Label noInternet = UiComponents.createLabel("Brak internetu, odpal program ponownie gdy będziesz połączony!", Color.WHITE, 50, 0, -330, -200);
     //---------------Buttons-----------------
     protected Button buttonRegister = UiComponents.createButton("Create Account", -500, 5, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 10);
     protected Button buttonLogin = UiComponents.createButton("Log in", -470, 5, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 10);
@@ -133,7 +134,7 @@ public class Components {
         return db;
     }
 
-    public Components(Stage primaryStage){
+    public Components(Stage primaryStage) throws DBError {
         this.primaryStage = primaryStage;
         prepareClippy();
         System.out.println(secondBlock.get(26).getClass().getSimpleName());
@@ -152,7 +153,7 @@ public class Components {
         try {
             db = new JsonDatabase();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new DBError("Problemy z utworzeniem bazy danych!");
         }
     }
 
@@ -173,6 +174,11 @@ public class Components {
         clippyLabel.setTranslateY(560);
     }
 
+    public void noInternetAvalaible(){
+        System.out.println("brak neta!");
+        //TODO - forsowne wrzucenie na nowy ekran z logowaniem z labelem no Internet Avalaible
+        // i zablokowanie pozostalych przyciskow
+    }
     public void prepareEarth() {
         PhongMaterial earthMaterial = new PhongMaterial();
         earthMaterial.setDiffuseMap(new Image(getClass().getResource("/Blue_Marble_2002.png").toExternalForm()));

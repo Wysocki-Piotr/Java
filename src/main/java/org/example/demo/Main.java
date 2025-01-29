@@ -1,10 +1,13 @@
 package org.example.demo;
 
 import Components.Components;
+import Exceptions.DBError;
+import Serwer.Config;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import java.io.IOException;
 import Alert.AlertManagement;
+import static Serwer.Config.isInternetAvailable;
 
 
 public class Main extends Application {
@@ -13,7 +16,7 @@ public class Main extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws IOException {
+    public void start(Stage primaryStage) throws DBError {
         Components components = new Components(primaryStage);
         primaryStage.centerOnScreen();
         primaryStage.setTitle("Global Weather App");
@@ -25,9 +28,8 @@ public class Main extends Application {
         primaryStage.setOnCloseRequest(event -> {
             System.exit(0);
         });
-
-        AlertManagement alert = new AlertManagement(components);
-        alert.scheduleTemperatureCheck();
+        Serwer.Config internetChecker = new Config(components);
+        internetChecker.startChecking();
     }
 
 }

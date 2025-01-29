@@ -164,13 +164,24 @@ public class PredictionService {
     private static Map<String, StringBuilder> groupForecastsByDay(List<WeatherForecast.Forecast> forecasts) {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat hourFormat = new SimpleDateFormat("HH");
 
         Map<String, StringBuilder> dailyForecasts = new TreeMap<>();
+        String firstDay = null;
+        boolean hasForecastBefore22 = false;
 
         for (WeatherForecast.Forecast forecast : forecasts) {
 
             Date date = new Date(forecast.dt * 1000);
             String day = dateFormat.format(date);
+            int hour = Integer.parseInt(hourFormat.format(date));
+
+            if (firstDay == null) {
+                firstDay = day;
+            }
+            if (day.equals(firstDay) && hour < 22) {
+                hasForecastBefore22 = true;
+            }
             String details = String.format(
                     "  Time: %tR | Temp: %.1f°C | Humidity: %d%% | Weather: %s | Wind: %.1f m/s | Pressure: %d hPa%n",
                     date, forecast.main.temp, forecast.main.humidity, forecast.weather.get(0).description,
@@ -179,10 +190,8 @@ public class PredictionService {
             dailyForecasts.computeIfAbsent(day, k -> new StringBuilder());
             dailyForecasts.get(day).append(details);
         }
-        Iterator<String> iterator = dailyForecasts.keySet().iterator();
-        if (iterator.hasNext()) {
-            String firstKey = iterator.next();
-            dailyForecasts.remove(firstKey);
+        if (firstDay != null && hasForecastBefore22) {
+            dailyForecasts.remove(firstDay);
         }
 
         return dailyForecasts;

@@ -5,10 +5,7 @@ import Exceptions.FileWithCountriesError;
 import Exceptions.PageNotFoundException;
 import Serwer.WeatherResponse;
 import Serwer.WeatherService;
-import com.sothawo.mapjfx.Configuration;
-import com.sothawo.mapjfx.Coordinate;
-import com.sothawo.mapjfx.MapType;
-import com.sothawo.mapjfx.MapView;
+import com.sothawo.mapjfx.*;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -20,6 +17,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MapViewComponents {
 
@@ -44,6 +42,7 @@ public class MapViewComponents {
     private Label humidityLabelResp;
     private Label[] labels;
     private Button pointFromUserButton;
+    private Button randomPointButton;
 
 
 
@@ -97,13 +96,15 @@ public class MapViewComponents {
         pointFromUserButton.setTranslateY(300);
         pointFromUserButton.setTranslateX(470);
 
+        randomPointButton = UiComponents.createButton("Szczęśliwy traf",470,350,0,350,35,15);
+
 
         //---------------------Labels---------------------
 
         Label enterLabel = UiComponents.createLabel("Podaj koordynaty", Color.WHITE, 30, 470, -420, 0);
         stackPane.getChildren().add(enterLabel);
-        Label xLabel = UiComponents.createLabel("Lat:", Color.WHITE, 22, 320, -370, 0);
-        Label yLabel = UiComponents.createLabel("Long:", Color.WHITE, 22, 320, -340, 0);
+        Label xLabel = UiComponents.createLabel("Long:", Color.WHITE, 22, 320, -370, 0);
+        Label yLabel = UiComponents.createLabel("Lat:", Color.WHITE, 22, 320, -340, 0);
 
 
         stackPane.getChildren().add(xLabel);
@@ -153,12 +154,8 @@ public class MapViewComponents {
 
         stackPane.getChildren().add(currentLocationWeatherButton);
         stackPane.getChildren().addAll(tempLabel, countryLabel, windLabel, pressureLabel, humidityLabel,
-                tempLabelResp,countryLabelResp,windLabelResp,pressureLabelResp,humidityLabelResp,pointFromUserButton);
-
-
-
-
-
+                tempLabelResp,countryLabelResp,windLabelResp,pressureLabelResp,humidityLabelResp,pointFromUserButton,
+                randomPointButton);
 
         stackPane.getChildren().add(showButton);
 
@@ -181,29 +178,26 @@ public class MapViewComponents {
         }
     }
 
-    private double[] apiCoordinates2MapCoorddinates(double x, double y){
-        double[] mapCoordinates = new double[2];
-        mapCoordinates[0] = x;
-        mapCoordinates[1] = y;
-        return mapCoordinates;
-    }
+//    private double[] apiCoordinates2MapCoorddinates(double x, double y){
+//        double[] mapCoordinates = new double[2];
+//        mapCoordinates[0] = x;
+//        mapCoordinates[1] = y;
+//        return mapCoordinates;
+//    }
 
     private void setButtonsFunctionalities(){
 
         showButton.setOnAction(event -> {
-            System.out.println(inputLongtitude.getText());
-            System.out.println(inputLatitude.getText());
+
 
             if (CoordinateValidator.userInputValidatorLatitude(inputLongtitude.getText()) && CoordinateValidator.userInputValidatorLongtitude(inputLatitude.getText())) {
-
-                System.out.println(addSign(inputLongtitude.getText()));
-                System.out.println(addSign(inputLatitude.getText()));
-
-                setCoordinates(inputLongtitude.getText(),inputLatitude.getText());
+                System.out.println(inputLatitude.getText());
+                System.out.println(inputLongtitude.getText());
+                setCoordinates(inputLatitude.getText(),inputLongtitude.getText(),11);
 
                 //TODO wspolrzedne po nacisnieciu przycisku "Pokaz pogode ..." musza byc w odpowiednim formacie
                 try {
-                    WeatherResponse response = getWeatherDataFromAPI(inputLongtitude.getText(),inputLatitude.getText());
+                    WeatherResponse response = getWeatherDataFromAPI(inputLatitude.getText(),inputLongtitude.getText());
 
 
                     setWeatherDataOnLabels(response);
@@ -211,6 +205,7 @@ public class MapViewComponents {
 
 
                 } catch (IOException | PageNotFoundException | FileWithCountriesError e) {
+                    System.out.println("error");
                     throw new RuntimeException(e);
                 }
 
@@ -229,31 +224,48 @@ public class MapViewComponents {
         });
         currentLocationWeatherButton.setOnAction(event ->{
             double[] curCoordinates = Localization.getCurrentLocalizationByApi();
-            setCoordinates(String.valueOf(curCoordinates[0]),String.valueOf(curCoordinates[1]));
+            setCoordinates(String.valueOf(curCoordinates[0]),String.valueOf(curCoordinates[1]),11);
+            inputLongtitude.setText(String.valueOf(curCoordinates[1]));
+            inputLatitude.setText(String.valueOf(curCoordinates[0]));
             try {
                 WeatherResponse response = getWeatherDataFromAPI(String.valueOf(curCoordinates[0]),String.valueOf(curCoordinates[1]));
                 setWeatherDataOnLabels(response);
 
-                inputLongtitude.setText(String.valueOf(curCoordinates[0]));
-                inputLatitude.setText(String.valueOf(curCoordinates[1]));
+
             } catch (IOException | PageNotFoundException | FileWithCountriesError e) {
                 throw new RuntimeException(e);
             }
 
 
         });
+
+        pointFromUserButton.setOnAction(event ->{
+            double[] curCoordinates = curCoordinates();
+            setCoordinates(String.valueOf(curCoordinates[0]),String.valueOf(curCoordinates[1]),11);
+
+            try {
+                WeatherResponse response = getWeatherDataFromAPI(curCoordinates[0],curCoordinates[1]);
+                setWeatherDataOnLabels(response);
+                inputLongtitude.setText(String.valueOf(curCoordinates[1]));
+                inputLatitude.setText(String.valueOf(curCoordinates[0]));
+                //setBlackDotOnMap(curCoordinates[0],curCoordinates[1]);
+            } catch (IOException | PageNotFoundException | FileWithCountriesError e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        randomPointButton.setOnAction(event ->{
+            WeatherResponse resp = randomPointWeather();
+
+            setWeatherDataOnLabels(resp);
+
+        });
     }
-
-    private double addSign(String coordinate){
-        char lastChar = coordinate.charAt(coordinate.length()-1);
-        double value = Double.parseDouble(coordinate.substring(0,coordinate.length()-1));
-        if (lastChar == 'E' || lastChar == 'N')
-            return value;
-        return -value;
+    private void setBlackDotOnMap(double latitude, double longtitude) {
+        Coordinate coordinate = new Coordinate(latitude, longtitude);
+        Marker marker = Marker.createProvided(Marker.Provided.BLUE).setPosition(coordinate);
+        mapView.addMarker(marker);
     }
-
-
-
 
     private static class CoordinateValidator {
 
@@ -289,33 +301,62 @@ public class MapViewComponents {
         return weatherResponse;
     }
 
-    private void setCoordinates(String latitude, String longtitude) {
+    private WeatherResponse getWeatherDataFromAPI(double latitude, double longtitude) throws IOException, PageNotFoundException, FileWithCountriesError {
+        HttpURLConnection conn = WeatherService.createByLatLon(latitude, longtitude);
+        WeatherResponse weatherResponse = WeatherService.apiAnswer(conn);
+        return weatherResponse;
+    }
+
+    private void setCoordinates(String latitude, String longtitude,int zoom) {
         double latitudeValue = Double.parseDouble(latitude);
         double longtitudeValue = Double.parseDouble(longtitude);
         mapView.setCenter(new Coordinate(latitudeValue, longtitudeValue));
-        mapView.setZoom(11);
+        mapView.setZoom(zoom);
     }
 
-//    private double translateUserCoordinatesToProperTypeX(String userCoordinateX) {
-//        char lastChar = userCoordinateX.charAt(userCoordinateX.length()-1);
-//        if (lastChar == 'E'){
-//            return Double.parseDouble(userCoordinateX.substring(0, userCoordinateX.length()-1));
-//        }else{
-//            return -Double.parseDouble(userCoordinateX.substring(0, userCoordinateX.length()-1));
-//        }
+//    private double[] getMapCoordinates(){
+//        Coordinate center = mapView.getCenter();
+//        return new double[]{center.getLatitude(), center.getLongitude()};
+//    }
+//    private void displayWeatherAPIResponse(){
+//        //TODO Display weather data from API
 //    }
 
-//    private double translateUserCoordinatesToProperTypeY(String userCoordinateY) {
-//        char lastChar = userCoordinateY.charAt(userCoordinateY.length()-1);
-//        if (lastChar == 'N'){
-//            return Double.parseDouble(userCoordinateY.substring(0, userCoordinateY.length()-1));
-//        }else{
-//            return -Double.parseDouble(userCoordinateY.substring(0, userCoordinateY.length()-1));
-//        }
-//    }
+    private WeatherResponse randomPointWeather(){
 
-    private void displayWeatherAPIResponse(){
-        //TODO Display weather data from API
+        WeatherResponse resp;
+
+        while(true){
+            double randLat = Math.round(ThreadLocalRandom.current().nextDouble(-90, 90) * 1000000.0) / 1000000.0;
+            double randLong = Math.round(ThreadLocalRandom.current().nextDouble(-180, 180) * 1000000.0) / 1000000.0;
+            System.out.println("randLat: " + randLat);
+            System.out.println("randLong: " + randLong);
+            try {
+                resp = getWeatherDataFromAPI(randLat,randLong);
+                if(resp.sys.country == null){
+                    continue;
+                }else{
+                    setCoordinates(String.valueOf(randLat),String.valueOf(randLong),7);
+                    inputLongtitude.setText(String.valueOf(randLong));
+                    inputLatitude.setText(String.valueOf(randLat));
+                    return resp;
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (PageNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (FileWithCountriesError e) {
+                throw new RuntimeException(e);
+            }
+
+
+        }
+
+    }
+
+    private double[] curCoordinates(){
+        Coordinate center = mapView.getCenter();
+        return new double[]{center.getLatitude(), center.getLongitude()};
     }
 
 

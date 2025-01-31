@@ -244,11 +244,8 @@ public class Components {
             try {
                 boolean confirmed = Potwierdzenie.show("Czy na pewno chcesz usunąć konto?");
                 if (confirmed) {
-                    System.out.println("Usunięte");
                     db.deleteUser(email);
                     transisionReverse(universe);
-                } else {
-                    System.out.println("Anulowane");
                 }
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
@@ -268,7 +265,7 @@ public class Components {
                 if (wartosc2 <= wartosc1)
                     throw new Exception("Podaj poprawny zakres!");
             } catch (NumberFormatException ex) {
-                System.out.println("Podaj wartość liczbową!");
+                throw new RuntimeException(ex);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -356,9 +353,7 @@ public class Components {
             tile.setPrefSize(150, 150);
             tile.setStyle("-fx-background-color: #FFFFFF; -fx-border-color: #39FF14;" +
                     " -fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #1E88E5");
-            tile.setOnAction(event -> {
-                System.out.println("Selected place: " + place);
-            });
+            tile.setOnAction(event -> {});
             Button deleteButton = new Button("Usuń");
             deleteButton.setPrefSize(150, 30);
             deleteButton.setStyle("-fx-background-color: lightblue; -fx-border-color: red;" +
@@ -512,9 +507,6 @@ public class Components {
                 });
                 timeline.getKeyFrames().add(keyFrame);
             }
-            System.out.println(earth.getTranslateZ());
-            System.out.println(earth.getTranslateX());
-            System.out.println(earth.getTranslateY());
             timeline.setOnFinished(event -> {
 
                 MapViewComponents mapViewComponents = new MapViewComponents(this);

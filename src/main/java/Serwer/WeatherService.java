@@ -1,10 +1,7 @@
 package Serwer;
 import DB.JsonDatabase;
 import DB.UserScheme;
-import Exceptions.Credentials;
-import Exceptions.DBError;
-import Exceptions.FileWithCountriesError;
-import Exceptions.PageNotFoundException;
+import Exceptions.*;
 import com.google.gson.Gson;
 
 import java.io.*;
@@ -25,8 +22,11 @@ public class WeatherService {
         try {
             apiKey = Config.getApiKey();
         } catch (IOException e) {
-            System.out.println("Problemy z kluczem API");
-            throw new RuntimeException();
+            try {
+                throw new ApiKeyError("Problemy z kluczem Api!");
+            } catch (ApiKeyError ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 
@@ -69,8 +69,6 @@ public class WeatherService {
                     throw new DBError("Problemy z zapisywaniem użytkowników");
                 }
             }
-            else
-                System.out.println("Nie można dodać elementu!");
         }
         return fav;
     }
@@ -182,7 +180,6 @@ public class WeatherService {
                 entry -> entry.getKey(),
                 entry -> entry.getValue()
         ));
-        System.out.println(filtered);
         return filtered;
     }
 

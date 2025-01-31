@@ -45,7 +45,6 @@ public class LoginBlock {
                 String password = components.textLoginPass.getText();
 
                 if (email.isEmpty() || password.isEmpty()) {
-                    System.out.println("Fill all fields");
                     clearEmail();
                     return;
                 }
@@ -58,11 +57,9 @@ public class LoginBlock {
                             .anyMatch(user -> user.getEmail().equals(email) && user.getPassword().equals(password));
 
                     if (loginSuccessful) {
-                        System.out.println("success");
                         components.transision(components.universe, email, components.camera, components.primaryStage);
 
                     } else {
-                        System.out.println("Invalid");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -76,13 +73,11 @@ public class LoginBlock {
                 String passwordRep = components.textRegisterPassRep.getText();
 
                 if (email.isEmpty() || password.isEmpty() || passwordRep.isEmpty()) {
-                    System.out.println("Fill all fields");
                     clearRegister();
                     return;
                 }
 
                 if (!password.equals(passwordRep)) {
-                    System.out.println("Passwords do not match.");
                     clearRegister();
                     return;
                 }
@@ -93,7 +88,6 @@ public class LoginBlock {
 
                     for (UserScheme user : users) {
                         if (user.getEmail().equals(email)) {
-                            System.out.println("Email already exists in the database.");
                             clearRegister();
                             return;
                         }
@@ -106,7 +100,6 @@ public class LoginBlock {
                     users.add(newUser);
 
                     db.writeUsers(users);
-                    System.out.println("registration successful");
                     components.universe.getChildren().removeAll(components.textRegisterEmail, components.textRegisterPass,
                             components.textRegisterPassRep, components.buttonLogin);
 

@@ -31,7 +31,6 @@ import javafx.scene.image.ImageView;
 
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static Components.UiComponents.place;
@@ -75,10 +74,10 @@ public class Components {
     protected Button save = UiComponents.createButton("Zapisz prognozę do pliku pdf", -150, -150, -200, 250, 40, 15);
 
     //---------------TextFields-----------------
-    protected TextField textRegisterPassRep = UiComponents.createTextField("Enter your password ", -620, -60, -200, 25, 200);
+    protected PasswordField textRegisterPassRep = UiComponents.createPasswordField("Enter your password ", -620, -60, -200, 25, 200);
     protected TextField textRegisterEmail = UiComponents.createTextField("Enter your Name", -620, -100, -200, 25, 200);
-    protected TextField textRegisterPass = UiComponents.createTextField("Enter your password again ", -620, -20, -200, 25, 200);
-    protected TextField textLoginPass = UiComponents.createTextField("Enter your password", -620, -20, -200, 25, 200);
+    protected PasswordField textRegisterPass = UiComponents.createPasswordField("Enter your password again ", -620, -20, -200, 25, 200);
+    protected PasswordField textLoginPass = UiComponents.createPasswordField("Enter your password", -620, -20, -200, 25, 200);
     protected TextField textLoginEmail = UiComponents.createTextField("Enter your email", -620, -70, -200, 25, 200);
     protected TextField textFavoritePlace = UiComponents.createTextField("Dodaj miejsce", -620, -60, -200, 25, 200);
     protected TextField textMin = UiComponents.createTextField("Podaj temperaturę min", -200, -320, -200, 25,150);
@@ -137,7 +136,6 @@ public class Components {
     public Components(Stage primaryStage) throws DBError {
         this.primaryStage = primaryStage;
         prepareClippy();
-        System.out.println(secondBlock.get(26).getClass().getSimpleName());
         universe.getChildren().addAll(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter, world);
 
         prepareCamera();
@@ -148,7 +146,6 @@ public class Components {
         RegisterBlock registerFunctionality = new RegisterBlock(this);
         registerFunctionality.prepareFunctionalityForRegisterBlock();
         LoginBlock loginFunctionality = new LoginBlock(this);
-        //MapViewComponents mapViewComponents = new MapViewComponents(this);
         loginFunctionality.prepareFunctionalityForLoginBlock();
         try {
             db = new JsonDatabase();
@@ -407,7 +404,6 @@ public class Components {
                 translateTransition.setByX(1000);
             translateTransition.play();
             translateTransition.setOnFinished(finish -> {
-                System.out.println(control.getClass().getSimpleName());
                 universe.getChildren().add(control);
 
             });

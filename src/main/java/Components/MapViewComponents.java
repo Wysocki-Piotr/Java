@@ -12,11 +12,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.text.DecimalFormat;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MapViewComponents {
@@ -43,6 +45,7 @@ public class MapViewComponents {
     private Label[] labels;
     private Button pointFromUserButton;
     private Button randomPointButton;
+    DecimalFormat df = new DecimalFormat("#.#####");
 
 
 
@@ -51,6 +54,7 @@ public class MapViewComponents {
         initializeMapView(components.primaryStage);
         setPanelLayout();
         setButtonsFunctionalities();
+        addCrosshair();
     }
 
 
@@ -191,8 +195,6 @@ public class MapViewComponents {
 
 
             if (CoordinateValidator.userInputValidatorLatitude(inputLongtitude.getText()) && CoordinateValidator.userInputValidatorLongtitude(inputLatitude.getText())) {
-                System.out.println(inputLatitude.getText());
-                System.out.println(inputLongtitude.getText());
                 setCoordinates(inputLatitude.getText(),inputLongtitude.getText(),11);
 
                 //TODO wspolrzedne po nacisnieciu przycisku "Pokaz pogode ..." musza byc w odpowiednim formacie
@@ -205,7 +207,6 @@ public class MapViewComponents {
 
 
                 } catch (IOException | PageNotFoundException | FileWithCountriesError e) {
-                    System.out.println("error");
                     throw new RuntimeException(e);
                 }
 
@@ -225,8 +226,8 @@ public class MapViewComponents {
         currentLocationWeatherButton.setOnAction(event ->{
             double[] curCoordinates = Localization.getCurrentLocalizationByApi();
             setCoordinates(String.valueOf(curCoordinates[0]),String.valueOf(curCoordinates[1]),11);
-            inputLongtitude.setText(String.valueOf(curCoordinates[1]));
-            inputLatitude.setText(String.valueOf(curCoordinates[0]));
+            inputLongtitude.setText(String.valueOf(curCoordinates[1]*1000000d / 1000000d));
+            inputLatitude.setText(String.valueOf(curCoordinates[0]*1000000d / 1000000d));
             try {
                 WeatherResponse response = getWeatherDataFromAPI(String.valueOf(curCoordinates[0]),String.valueOf(curCoordinates[1]));
                 setWeatherDataOnLabels(response);
@@ -246,9 +247,8 @@ public class MapViewComponents {
             try {
                 WeatherResponse response = getWeatherDataFromAPI(curCoordinates[0],curCoordinates[1]);
                 setWeatherDataOnLabels(response);
-                inputLongtitude.setText(String.valueOf(curCoordinates[1]));
-                inputLatitude.setText(String.valueOf(curCoordinates[0]));
-                //setBlackDotOnMap(curCoordinates[0],curCoordinates[1]);
+                inputLatitude.setText(String.valueOf(curCoordinates[0]*1000000d / 1000000d));
+                inputLongtitude.setText(String.valueOf(curCoordinates[1]*1000000d / 1000000d));
             } catch (IOException | PageNotFoundException | FileWithCountriesError e) {
                 throw new RuntimeException(e);
             }
@@ -260,11 +260,6 @@ public class MapViewComponents {
             setWeatherDataOnLabels(resp);
 
         });
-    }
-    private void setBlackDotOnMap(double latitude, double longtitude) {
-        Coordinate coordinate = new Coordinate(latitude, longtitude);
-        Marker marker = Marker.createProvided(Marker.Provided.BLUE).setPosition(coordinate);
-        mapView.addMarker(marker);
     }
 
     private static class CoordinateValidator {
@@ -314,31 +309,21 @@ public class MapViewComponents {
         mapView.setZoom(zoom);
     }
 
-//    private double[] getMapCoordinates(){
-//        Coordinate center = mapView.getCenter();
-//        return new double[]{center.getLatitude(), center.getLongitude()};
-//    }
-//    private void displayWeatherAPIResponse(){
-//        //TODO Display weather data from API
-//    }
-
     private WeatherResponse randomPointWeather(){
 
         WeatherResponse resp;
 
         while(true){
-            double randLat = Math.round(ThreadLocalRandom.current().nextDouble(-90, 90) * 1000000.0) / 1000000.0;
-            double randLong = Math.round(ThreadLocalRandom.current().nextDouble(-180, 180) * 1000000.0) / 1000000.0;
-            System.out.println("randLat: " + randLat);
-            System.out.println("randLong: " + randLong);
+            double randLat = Math.round(ThreadLocalRandom.current().nextDouble(-90, 90) * 1000000d) / 1000000d;
+            double randLong = Math.round(ThreadLocalRandom.current().nextDouble(-180, 180) * 1000000d) / 1000000d;
             try {
                 resp = getWeatherDataFromAPI(randLat,randLong);
                 if(resp.sys.country == null){
                     continue;
                 }else{
                     setCoordinates(String.valueOf(randLat),String.valueOf(randLong),7);
-                    inputLongtitude.setText(String.valueOf(randLong));
-                    inputLatitude.setText(String.valueOf(randLat));
+                    inputLatitude.setText(String.valueOf(randLat*1000000d / 1000000d));
+                    inputLongtitude.setText(String.valueOf(randLong*1000000d / 1000000d));
                     return resp;
                 }
             } catch (IOException e) {
@@ -357,6 +342,18 @@ public class MapViewComponents {
     private double[] curCoordinates(){
         Coordinate center = mapView.getCenter();
         return new double[]{center.getLatitude(), center.getLongitude()};
+    }
+
+    private void addCrosshair() {
+        Line horizontalLine = new Line(-10, 0, 10, 0);
+        horizontalLine.setStroke(Color.BLACK);
+        horizontalLine.setStrokeWidth(2);
+
+        Line verticalLine = new Line(0, -10, 0, 10);
+        verticalLine.setStroke(Color.BLACK);
+        verticalLine.setStrokeWidth(2);
+
+        stackPane.getChildren().addAll(horizontalLine, verticalLine);
     }
 
 

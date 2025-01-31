@@ -8,6 +8,20 @@ import javafx.scene.image.ImageView;
 
 public class UiComponents {
 
+
+    public static PasswordField createPasswordField(String promptText, int X, int Y, int Z, int height, int width) {
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText(promptText);
+        passwordField.setTranslateX(X);
+        passwordField.setTranslateY(Y);
+        passwordField.setTranslateZ(Z);
+        passwordField.setPrefHeight(height);
+        passwordField.setPrefWidth(width);
+        passwordField.setFocusTraversable(false);
+        return passwordField;
+    }
+
+
     public static TextField createTextField(String promopText,int X,int Y, int Z,int height,int width){
         TextField textLogin = new TextField();
         textLogin.setPromptText(promopText);

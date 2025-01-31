@@ -63,7 +63,7 @@ public class Components {
     protected Label alert2 = UiComponents.createLabel("Brak alertów z wiatrem",Color.WHITE, 20, -700,150, -200);
     protected Label alert3 = UiComponents.createLabel("Brak alertów z opadami",Color.WHITE, 20, -700,200, -200);
     protected Label noInternet = UiComponents.createLabel("Brak internetu, odpal program ponownie!", Color.WHITE, 30, -300, -330, -200);
-    protected Label noResults = UiComponents.createLabel("Brak krajów spełniających warunków", Color.WHITE, 20, -50, -225, -200);
+    protected Label noResults = UiComponents.createLabel("Brak krajów spełniających warunków", Color.WHITE, 15, -50, -225, -200);
     //---------------Buttons-----------------
     protected Button buttonRegister = UiComponents.createButton("Create Account", -500, 5, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 10);
     protected Button buttonLogin = UiComponents.createButton("Log in", -470, 5, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 10);
@@ -109,7 +109,8 @@ public class Components {
 
     protected List<Node> secondBlock = new ArrayList<>(Arrays.asList(label4, textFavoritePlace, buttonEnter2, show,
             deleteAccount, label5, logOut, comboBox, label6, label7, comboBoxCountries, gridPane2, save,
-            filter, textMin, textMax, result1, result2, result3, img1, img2, img3, alert1, alert2, alert3, gridPane, imageView, clippyLabel));
+            filter, textMin, textMax, result1, result2, result3, img1, img2, img3, alert1, alert2, alert3, gridPane, imageView, clippyLabel,
+            noResults));
 
     protected AnimationTimer timer;
 
@@ -140,7 +141,7 @@ public class Components {
         this.primaryStage = primaryStage;
         prepareClippy();
         universe.getChildren().addAll(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter, world);
-
+        noResults.setVisible(false);
         prepareCamera();
         prepareEarth();
         prepareSceneMain();
@@ -176,7 +177,7 @@ public class Components {
 
     public void noInternetAvalaible(ScheduledExecutorService scheduler){
         if(Logged)
-        transisionReverse(universe);
+            transisionReverse(universe);
         Platform.runLater(() -> universe.getChildren().add(noInternet));
         buttonEnter.setMouseTransparent(true);
         buttonRegister.setMouseTransparent(true);
@@ -281,27 +282,35 @@ public class Components {
             } catch (PageNotFoundException ex) {
                 throw new RuntimeException(ex);
             }
+            noResults.setVisible(false);
             result1.setVisible(true);
             result2.setVisible(true);
             result3.setVisible(true);
             img1.setVisible(false);
             img2.setVisible(false);
             img3.setVisible(false);
-            String r1 = (String) mapa.keySet().stream().skip(0).findFirst().orElse("");
-            String r2 = (String) mapa.keySet().stream().skip(1).findFirst().orElse("");
-            String r3 = (String) mapa.keySet().stream().skip(2).findFirst().orElse("");
-            result1.setText(r1);
-            result2.setText(r2);
-            result3.setText(r3);
-            img1.setImage(new Image((String) mapa.values().stream().findFirst().orElse("https://via.placeholder.com/1x1/000000")));
-            img2.setImage(new Image((String) mapa.values().stream().skip(1).findFirst().orElse("https://via.placeholder.com/1x1/000000")));
-            img3.setImage(new Image((String) mapa.values().stream().skip(2).findFirst().orElse("https://via.placeholder.com/1x1/000000")));
-            place(img1, -250, -225, -200);
-            place(img2, -250, -200, -200);
-            place(img3, -250, -175, -200);
-            img1.setVisible(true);
-            img2.setVisible(true);
-            img3.setVisible(true);
+            if (mapa.isEmpty()){
+                noResults.setVisible(true);
+                result1.setText("");
+                result2.setText("");
+                result3.setText("");}
+            else {
+                String r1 = (String) mapa.keySet().stream().skip(0).findFirst().orElse("");
+                String r2 = (String) mapa.keySet().stream().skip(1).findFirst().orElse("");
+                String r3 = (String) mapa.keySet().stream().skip(2).findFirst().orElse("");
+                result1.setText(r1);
+                result2.setText(r2);
+                result3.setText(r3);
+                img1.setImage(new Image((String) mapa.values().stream().findFirst().orElse("https://via.placeholder.com/1x1/000000")));
+                img2.setImage(new Image((String) mapa.values().stream().skip(1).findFirst().orElse("https://via.placeholder.com/1x1/000000")));
+                img3.setImage(new Image((String) mapa.values().stream().skip(2).findFirst().orElse("https://via.placeholder.com/1x1/000000")));
+                place(img1, -250, -225, -200);
+                place(img2, -250, -200, -200);
+                place(img3, -250, -175, -200);
+                img1.setVisible(true);
+                img2.setVisible(true);
+                img3.setVisible(true);
+            }
         });
         save.onActionProperty().set((ActionEvent e) ->{
             try {
@@ -429,8 +438,6 @@ public class Components {
 
             }
         }));
-
-
         pause.play();
         pauseForClippy.play();
 

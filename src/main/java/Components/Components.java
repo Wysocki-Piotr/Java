@@ -32,6 +32,7 @@ import javafx.scene.image.ImageView;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static Components.UiComponents.place;
 import static Serwer.WeatherService.filterWeather;
@@ -61,7 +62,8 @@ public class Components {
     protected Label alert1 = UiComponents.createLabel("Brak alertów z temperaturą",Color.WHITE, 20, -700,100, -200);
     protected Label alert2 = UiComponents.createLabel("Brak alertów z wiatrem",Color.WHITE, 20, -700,150, -200);
     protected Label alert3 = UiComponents.createLabel("Brak alertów z opadami",Color.WHITE, 20, -700,200, -200);
-    protected Label noInternet = UiComponents.createLabel("Brak internetu, odpal program ponownie gdy będziesz połączony!", Color.WHITE, 50, 0, -330, -200);
+    protected Label noInternet = UiComponents.createLabel("Brak internetu, odpal program ponownie!", Color.WHITE, 30, -300, -330, -200);
+    protected Label noResults = UiComponents.createLabel("Brak krajów spełniających warunków", Color.WHITE, 20, -50, -225, -200);
     //---------------Buttons-----------------
     protected Button buttonRegister = UiComponents.createButton("Create Account", -500, 5, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 10);
     protected Button buttonLogin = UiComponents.createButton("Log in", -470, 5, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 10);
@@ -82,6 +84,7 @@ public class Components {
     protected TextField textFavoritePlace = UiComponents.createTextField("Dodaj miejsce", -620, -60, -200, 25, 200);
     protected TextField textMin = UiComponents.createTextField("Podaj temperaturę min", -200, -320, -200, 25,150);
     protected TextField textMax = UiComponents.createTextField("Podaj temperaturę max", -25, -320, -200, 25,150);
+
     //-------------ComboBox-----------------
     ObservableList<String> options = FXCollections.observableArrayList("Clear","Rain","Clouds");
     ComboBox combo = new ComboBox<>(options);
@@ -171,10 +174,13 @@ public class Components {
         clippyLabel.setTranslateY(560);
     }
 
-    public void noInternetAvalaible(){
-        System.out.println("brak neta!");
-        //TODO - forsowne wrzucenie na nowy ekran z logowaniem z labelem no Internet Avalaible
-        // i zablokowanie pozostalych przyciskow
+    public void noInternetAvalaible(ScheduledExecutorService scheduler){
+        if(Logged)
+        transisionReverse(universe);
+        Platform.runLater(() -> universe.getChildren().add(noInternet));
+        buttonEnter.setMouseTransparent(true);
+        buttonRegister.setMouseTransparent(true);
+        scheduler.shutdown();
     }
     public void prepareEarth() {
         PhongMaterial earthMaterial = new PhongMaterial();

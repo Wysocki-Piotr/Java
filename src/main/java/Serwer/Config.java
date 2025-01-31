@@ -56,11 +56,7 @@ public class Config {
             AlertManagement alert = new AlertManagement(components);
             alert.scheduleTemperatureCheck();
         } else {
-            components.noInternetAvalaible();
+            components.noInternetAvalaible(scheduler);
         }
-    }
-
-    public void stop() {
-        scheduler.shutdown();
     }
 }

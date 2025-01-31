@@ -17,7 +17,8 @@ public class Config {
     private boolean internetAvailable = false;
     private Components components;
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    public static String getApiKey() throws FileNotFoundException {
+    private static final ScheduledExecutorService scheduler2 = Executors.newScheduledThreadPool(1);
+    protected static String getApiKey() throws FileNotFoundException {
         Properties properties = new Properties();
         try {
             properties.load(new FileInputStream("src/main/resources/config.properties"));
@@ -47,8 +48,8 @@ public class Config {
     public void startChecking() {
         scheduler.scheduleAtFixedRate(this::checkInternet, 0, 2, TimeUnit.SECONDS);
     }
-
-    private void checkInternet() {
+    public void startCheckingIfAccesible() {scheduler2.scheduleAtFixedRate(this::check, 0, 2, TimeUnit.SECONDS);}
+    public void checkInternet() {
         boolean isAvailable = isInternetAvailable();
         internetAvailable = isAvailable;
 
@@ -56,7 +57,15 @@ public class Config {
             AlertManagement alert = new AlertManagement(components);
             alert.scheduleTemperatureCheck();
         } else {
-            components.noInternetAvalaible(scheduler);
+            components.noInternetAvalaible(scheduler, this);
         }
+    }
+    public void check(){
+        if (isInternetAvailable()){
+            AlertManagement alert = new AlertManagement(components);
+            alert.scheduleTemperatureCheck();
+            components.internetAvalaible(scheduler2, this);
+        }
+
     }
 }

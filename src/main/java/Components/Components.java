@@ -6,6 +6,7 @@ import Exceptions.Credentials;
 import Exceptions.DBError;
 import Exceptions.FileWithCountriesError;
 import Exceptions.PageNotFoundException;
+import Serwer.Config;
 import Serwer.PredictionService;
 import Serwer.WeatherForecast;
 import Serwer.WeatherService;
@@ -28,6 +29,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.example.demo.Potwierdzenie;
 import javafx.scene.image.ImageView;
+import Serwer.Config.*;
 
 
 import java.io.IOException;
@@ -175,13 +177,23 @@ public class Components {
         clippyLabel.setTranslateY(560);
     }
 
-    public void noInternetAvalaible(ScheduledExecutorService scheduler){
+    public void noInternetAvalaible(ScheduledExecutorService scheduler, Config internet){
         if(Logged)
             transisionReverse(universe);
         Platform.runLater(() -> universe.getChildren().add(noInternet));
         buttonEnter.setMouseTransparent(true);
         buttonRegister.setMouseTransparent(true);
         scheduler.shutdown();
+        internet.startCheckingIfAccesible();
+    }
+    public void internetAvalaible(ScheduledExecutorService scheduler2, Config internet){
+        scheduler2.shutdown();
+        Platform.runLater(() -> {
+            universe.getChildren().remove(noInternet);
+            buttonEnter.setMouseTransparent(false);
+            buttonRegister.setMouseTransparent(false);
+        });
+        internet.startChecking();
     }
     public void prepareEarth() {
         PhongMaterial earthMaterial = new PhongMaterial();

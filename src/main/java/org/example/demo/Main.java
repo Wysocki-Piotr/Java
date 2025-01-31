@@ -12,7 +12,7 @@ import static Serwer.Config.isInternetAvailable;
 
 public class Main extends Application {
 
-    public Main() throws IOException {
+    public Main(){
     }
 
     @Override

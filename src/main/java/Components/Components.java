@@ -180,14 +180,14 @@ public class Components {
     public void noInternetAvalaible(ScheduledExecutorService scheduler, Config internet){
         if(Logged)
             transisionReverse(universe);
-        Platform.runLater(() -> universe.getChildren().add(noInternet));
+        if (!universe.getChildren().contains(noInternet)) {
+            Platform.runLater(() -> universe.getChildren().add(noInternet));
+        }
         buttonEnter.setMouseTransparent(true);
         buttonRegister.setMouseTransparent(true);
-        scheduler.shutdown();
         internet.startCheckingIfAccesible();
     }
     public void internetAvalaible(ScheduledExecutorService scheduler2, Config internet){
-        scheduler2.shutdown();
         Platform.runLater(() -> {
             universe.getChildren().remove(noInternet);
             buttonEnter.setMouseTransparent(false);

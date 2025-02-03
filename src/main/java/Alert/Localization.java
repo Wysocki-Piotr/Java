@@ -33,7 +33,7 @@ public class Localization {
         } catch (MalformedURLException e) {
             throw new RuntimeException("Invalid URL", e);
         } catch (IOException e) {
-            throw new RuntimeException("Error while connecting to API", e);
+            throw new RuntimeException("Error while connecting to localization API", e);
         }
     }
 }

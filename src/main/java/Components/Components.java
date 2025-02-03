@@ -64,8 +64,8 @@ public class Components {
     protected Label alert1 = UiComponents.createLabel("Brak alertów z temperaturą",Color.WHITE, 20, -700,100, -200);
     protected Label alert2 = UiComponents.createLabel("Brak alertów z wiatrem",Color.WHITE, 20, -700,150, -200);
     protected Label alert3 = UiComponents.createLabel("Brak alertów z opadami",Color.WHITE, 20, -700,200, -200);
-    protected Label noInternet = UiComponents.createLabel("Brak internetu, odpal program ponownie!", Color.WHITE, 30, -300, -330, -200);
-    protected Label noResults = UiComponents.createLabel("Brak krajów spełniających warunków", Color.WHITE, 15, -50, -225, -200);
+    protected Label noInternet = UiComponents.createLabel("Brak internetu, czekam na połączenie!", Color.WHITE, 30, -300, -330, -200);
+    protected Label noResults = UiComponents.createLabel("Brak miast spełniających warunki!", Color.WHITE, 15, -50, -225, -200);
     //---------------Buttons-----------------
     protected Button buttonRegister = UiComponents.createButton("Create Account", -500, 5, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 10);
     protected Button buttonLogin = UiComponents.createButton("Log in", -470, 5, -200, (int)Region.USE_COMPUTED_SIZE, (int)Region.USE_COMPUTED_SIZE, 10);

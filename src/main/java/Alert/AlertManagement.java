@@ -20,16 +20,12 @@ public class AlertManagement {
 
     public void checkAlert(){
         Timer timer = new Timer();
+        double [] coord = Localization.getCurrentLocalizationByApi();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                double [] coord = Localization.getCurrentLocalizationByApi();
                 long currentTime = System.currentTimeMillis() / 1000;
-                try {
-                    lista[0] = checkTempAlert(coord[0], coord[1], currentTime);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                lista[0] = checkTempAlert(coord[0], coord[1], currentTime);
                 lista[1] = checkWindAlert(coord[0], coord[1], currentTime);
                 lista[2] = checkRainAlert(coord[0], coord[1], currentTime);
                 Platform.runLater(() -> components.updateLabels(lista));

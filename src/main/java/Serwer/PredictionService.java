@@ -103,7 +103,7 @@ public class PredictionService {
         WeatherForecast outcome = gson.fromJson(String.valueOf(response), WeatherForecast.class);
         return outcome;
     }
-    public static Boolean checkTempAlert(double lat, double lon, long currentTime) throws IOException {
+    public static Boolean checkTempAlert(double lat, double lon, long currentTime) {
         WeatherForecast.Forecast forecast = checkForecast(lat, lon, currentTime);
         if(forecast.main.temp < 0) return true;
         return false;

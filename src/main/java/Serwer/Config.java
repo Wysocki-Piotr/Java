@@ -38,6 +38,7 @@ public class Config {
             int responseCode = connection.getResponseCode();
             return (200 <= responseCode && responseCode <= 399);
         } catch (IOException e) {
+            System.out.println(e);
             return false;
         }
 }

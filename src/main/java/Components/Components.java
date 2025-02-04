@@ -8,7 +8,6 @@ import Exceptions.FileWithCountriesError;
 import Exceptions.PageNotFoundException;
 import Serwer.Config;
 import Serwer.PredictionService;
-import Serwer.WeatherForecast;
 import Serwer.WeatherService;
 import javafx.animation.*;
 import javafx.application.Platform;
@@ -23,13 +22,11 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
-import javafx.scene.text.Font;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.example.demo.Potwierdzenie;
 import javafx.scene.image.ImageView;
-import Serwer.Config.*;
 
 
 import java.io.IOException;
@@ -116,6 +113,8 @@ public class Components {
 
     protected AnimationTimer timer;
 
+    private MapViewComponents mapViewComponents;
+
     protected final Sphere earth = new Sphere(150);
 
     public Camera camera = new PerspectiveCamera(true);
@@ -141,7 +140,8 @@ public class Components {
 
     public Components(Stage primaryStage) throws DBError {
         this.primaryStage = primaryStage;
-        prepareClippy();
+        UiComponents.prepareClippy(imageView);
+        UiComponents.prepareClippy(clippyLabel);
         universe.getChildren().addAll(label1, label2, label3, textLoginEmail, textLoginPass, buttonRegister, buttonEnter, world);
         noResults.setVisible(false);
         prepareCamera();
@@ -160,24 +160,18 @@ public class Components {
         }
     }
 
-    public void prepareClippy(){ // nie lepiej do UiComponents?
-
-
-        imageView.setFitHeight(100);
-        imageView.setFitWidth(100);
-        imageView.setTranslateZ(800);
-        imageView.setTranslateX(460);
-        imageView.setTranslateY(460);
-
-
-        clippyLabel.setTextFill(Color.WHITE);
-        clippyLabel.setFont(Font.font("Arial", 20));
-        clippyLabel.setTranslateZ(800);
-        clippyLabel.setTranslateX(460);
-        clippyLabel.setTranslateY(560);
-    }
-
     public void noInternetAvalaible(ScheduledExecutorService scheduler, Config internet){
+
+        if(mapViewComponents != null){
+            System.out.println("xd");
+            Platform.runLater(() -> {
+                mapViewComponents.moveBackButton.fire();
+            });
+            transisionReverse(universe);
+
+        }
+
+
         if(Logged)
             transisionReverse(universe);
         if (!universe.getChildren().contains(noInternet)) {
@@ -422,8 +416,15 @@ public class Components {
         });
         secondBlock.forEach(control -> {
             TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), control);
-            if (!first)
+
+
+            if (!first && !control.equals(imageView) && !control.equals(clippyLabel))
                 translateTransition.setByX(1000);
+
+            if(!first && (control.equals(imageView) || control.equals(clippyLabel)))
+                translateTransition.setByX(-1000);
+
+
             translateTransition.play();
             translateTransition.setOnFinished(finish -> {
                 universe.getChildren().add(control);
@@ -431,7 +432,7 @@ public class Components {
             });
         });
         PauseTransition pauseForClippy = new PauseTransition(Duration.seconds(1.3));
-        pauseForClippy.setOnFinished(event -> prepareClippy());
+        //pauseForClippy.setOnFinished(event -> prepareClippy());
 
 
         buttonFunctionalities(email, universe);
@@ -475,6 +476,7 @@ public class Components {
             if (onStartBlock.contains(control))
                 translateTransition.setOnFinished(finish -> universe.getChildren().add(control));
         });
+        mapViewComponents = null;
         earth.setOnMouseClicked(null);
     }
     public void animateCamera(Camera camera, int duration, int frames,boolean reverse) {
@@ -499,6 +501,8 @@ public class Components {
             }
             timeline.play();
 
+            mapViewComponents = null;
+
         }
         else{
 
@@ -521,7 +525,8 @@ public class Components {
             }
             timeline.setOnFinished(event -> {
 
-                MapViewComponents mapViewComponents = new MapViewComponents(this);
+                mapViewComponents = new MapViewComponents(this);
+                mapViewComponents.isActive = true;
                 earth.setUserData(null);
             });
             timeline.play();

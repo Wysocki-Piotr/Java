@@ -21,6 +21,25 @@ public class UiComponents {
         return passwordField;
     }
 
+    public static void prepareClippy(ImageView imageView) {
+        imageView.setFitHeight(100);
+        imageView.setFitWidth(100);
+        imageView.setTranslateZ(800);
+        imageView.setTranslateX(460);
+        imageView.setTranslateY(460);
+    }
+
+    public static void prepareClippy(Label clippyLabel) {
+        clippyLabel.setTextFill(Color.WHITE);
+        clippyLabel.setFont(Font.font("Arial", 20));
+        clippyLabel.setTranslateZ(800);
+        clippyLabel.setTranslateX(460);
+        clippyLabel.setTranslateY(560);
+    }
+
+
+
+
 
     public static TextField createTextField(String promopText,int X,int Y, int Z,int height,int width){
         TextField textLogin = new TextField();

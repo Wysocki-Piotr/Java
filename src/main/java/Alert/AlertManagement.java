@@ -29,7 +29,7 @@ public class AlertManagement {
                 lista[1] = checkWindAlert(coord[0], coord[1], currentTime);
                 lista[2] = checkRainAlert(coord[0], coord[1], currentTime);
                 Platform.runLater(() -> components.updateLabels(lista));
-                }
+            }
         }, 0, 300000);
     }
     public void scheduleTemperatureCheck(){

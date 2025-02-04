@@ -6,6 +6,7 @@ import Exceptions.PageNotFoundException;
 import Serwer.WeatherResponse;
 import Serwer.WeatherService;
 import com.sothawo.mapjfx.*;
+import javafx.animation.FadeTransition;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,13 +16,17 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.text.DecimalFormat;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MapViewComponents {
+
+    protected boolean isActive = false;
 
     private final Components components;
     private MapView mapView;
@@ -29,7 +34,7 @@ public class MapViewComponents {
     private Button showButton;
     private TextField inputLongtitude;
     private TextField inputLatitude;
-    private Button moveBackButton;
+    protected Button moveBackButton;
     private WeatherService weatherService;
     private Button currentLocationWeatherButton;
     private Label tempLabel;
@@ -45,25 +50,38 @@ public class MapViewComponents {
     private Label[] labels;
     private Button pointFromUserButton;
     private Button randomPointButton;
+    private Label errorLabel;
     DecimalFormat df = new DecimalFormat("#.#####");
+
+    private double [] curCoordinates;
 
 
 
     public MapViewComponents(Components components) {
         this.components = components;
         initializeMapView(components.primaryStage);
+        prepareErrorLabel();
         setPanelLayout();
         setButtonsFunctionalities();
         addCrosshair();
+
+
     }
 
 
     public void initializeMapView(Stage primaryStage) {
         mapView = new MapView();
         mapView.setMapType(MapType.OSM);
-        double[] curCoordinates = Localization.getCurrentLocalizationByApi();
-        mapView.setCenter(new Coordinate(curCoordinates[0], curCoordinates[1]));
-        mapView.setZoom(11);
+        CompletableFuture.supplyAsync(() -> Localization.getCurrentLocalizationByApi())
+                .thenAccept(resultCoordinates -> {
+                    curCoordinates = resultCoordinates;
+                })
+                .exceptionally(ex -> {
+                    return null;
+                });
+
+        mapView.setCenter(new Coordinate(0.0, 0.0));
+        mapView.setZoom(0);
         mapView.initialize(Configuration.builder()
                 .showZoomControls(true)
                 .build());
@@ -161,7 +179,7 @@ public class MapViewComponents {
                 tempLabelResp,countryLabelResp,windLabelResp,pressureLabelResp,humidityLabelResp,pointFromUserButton,
                 randomPointButton);
 
-        stackPane.getChildren().add(showButton);
+        stackPane.getChildren().addAll(showButton,errorLabel);
 
 
     }
@@ -182,49 +200,53 @@ public class MapViewComponents {
         }
     }
 
-//    private double[] apiCoordinates2MapCoorddinates(double x, double y){
-//        double[] mapCoordinates = new double[2];
-//        mapCoordinates[0] = x;
-//        mapCoordinates[1] = y;
-//        return mapCoordinates;
-//    }
 
     private void setButtonsFunctionalities(){
 
         showButton.setOnAction(event -> {
 
+            boolean checkLatitude;
+            boolean checkLongtitude;
 
-            if (CoordinateValidator.userInputValidatorLatitude(inputLongtitude.getText()) && CoordinateValidator.userInputValidatorLongtitude(inputLatitude.getText())) {
+            try{
+
+                checkLatitude = CoordinateValidator.userInputValidatorLatitude(inputLatitude.getText());
+                checkLongtitude = CoordinateValidator.userInputValidatorLongtitude(inputLongtitude.getText());
+
+            }catch (Exception e){
+
+                checkLongtitude=false;
+                checkLatitude=false;
+
+            }
+
+            if (checkLatitude && checkLongtitude) {
                 setCoordinates(inputLatitude.getText(),inputLongtitude.getText(),11);
 
-                //TODO wspolrzedne po nacisnieciu przycisku "Pokaz pogode ..." musza byc w odpowiednim formacie
                 try {
                     WeatherResponse response = getWeatherDataFromAPI(inputLatitude.getText(),inputLongtitude.getText());
-
-
                     setWeatherDataOnLabels(response);
-
-
 
                 } catch (IOException | PageNotFoundException | FileWithCountriesError e) {
                     throw new RuntimeException(e);
                 }
-
-
-
-
             } else {
-                //TODO: throw exception
+                showErrorLabel("Wprowadzono błędne dane");
             }
         });
+
         moveBackButton.setOnAction(event -> {
 
             components.primaryStage.setScene(components.sceneMain);
             components.animateCamera(components.camera, 900, 400, true);
 
         });
+
         currentLocationWeatherButton.setOnAction(event ->{
-            double[] curCoordinates = Localization.getCurrentLocalizationByApi();
+            if(curCoordinates == null){
+                showErrorLabel("Lokalizacja aktualnie niedostępna");
+                return;
+            }
             setCoordinates(String.valueOf(curCoordinates[0]),String.valueOf(curCoordinates[1]),11);
             inputLongtitude.setText(String.valueOf(curCoordinates[1]*1000000d / 1000000d));
             inputLatitude.setText(String.valueOf(curCoordinates[0]*1000000d / 1000000d));
@@ -269,7 +291,13 @@ public class MapViewComponents {
                 return false;
             }
 
-            Double value = Double.parseDouble(input);
+            Double value;
+            try{
+                value = Double.parseDouble(input);
+            }catch (Exception e){
+                return false;
+            }
+
             if (Math.abs(value) > 90) {
                 return false;
             }
@@ -279,7 +307,16 @@ public class MapViewComponents {
             if (input.isEmpty() || input == null) {
                 return false;
             }
-            Double value = Double.parseDouble(input);
+
+            Double value;
+            try{
+                value = Double.parseDouble(input);
+            }catch (Exception e){
+                return false;
+            }
+
+
+
             if (Math.abs(value)>180) {
                 return false;
             }
@@ -354,6 +391,24 @@ public class MapViewComponents {
         verticalLine.setStrokeWidth(2);
 
         stackPane.getChildren().addAll(horizontalLine, verticalLine);
+    }
+
+    private void prepareErrorLabel() {
+        errorLabel = new Label("Wprowadzono błędne dane");
+        errorLabel.setTextFill(Color.RED);
+        errorLabel.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
+        errorLabel.setTranslateY(-460); // Adjust the position as needed
+        errorLabel.setVisible(false);
+    }
+
+    private void showErrorLabel(String text) {
+        errorLabel.setVisible(true);
+        errorLabel.setText(text);
+        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(2), errorLabel);
+        fadeTransition.setFromValue(1.0);
+        fadeTransition.setToValue(0.0);
+        fadeTransition.setOnFinished(event -> errorLabel.setVisible(false));
+        fadeTransition.play();
     }
 
 

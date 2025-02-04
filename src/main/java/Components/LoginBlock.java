@@ -111,6 +111,7 @@ public class LoginBlock {
                     components.buttonLogin.setVisible(false);
                     components.buttonRegister.setVisible(true);
 
+
                 } catch (IOException e) {
                     try {
                         throw new DBError("Problem z pobraniem bazy danych");
